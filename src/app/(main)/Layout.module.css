@@ -1,0 +1,105 @@
+.root {
+  --paddings: 15px;
+
+  display: flex;
+  width: 100%;
+}
+
+.sidebar {
+  position: -webkit-sticky; /* Safari対応 */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background-color: #4caf93;
+  padding-left: var(--paddings);
+  padding-right: var(--paddings);
+}
+
+.hamburger {
+  cursor: pointer;
+  width: 40px;
+  margin-top: 15px;
+}
+
+.hamburger .menuCloseArrow,
+.hamburger .menuOpenArrow {
+  display: block;
+  height: 1px;
+  width: 30px;
+  background: white;
+  margin-bottom: 10px;
+}
+
+.hamburger .menuCloseArrow:last-child,
+.hamburger .menuOpenArrow:last-child {
+  margin-bottom: 0;
+}
+
+/* メニューを閉じるアニメーション */
+.hamburger:hover .menuCloseArrow {
+  transition: 0.2s;
+}
+
+.hamburger:hover .menuCloseArrow:nth-child(1) {
+  width: 15px;
+  height: 2px;
+  transform: translateY(7px) translateX(-1px) rotate(140deg);
+}
+
+.hamburger:hover .menuCloseArrow:nth-child(2) {
+  height: 2px;
+}
+
+.hamburger:hover .menuCloseArrow:nth-child(3) {
+  width: 15px;
+  height: 2px;
+  transform: translateY(-7px) translateX(-1px) rotate(-140deg);
+  margin-bottom: -3px; /* アニメーションの際の調整 */
+}
+
+/* メニューを開くアニメーション */
+.hamburger:hover .menuOpenArrow {
+  transition: 0.2s;
+}
+
+.hamburger:hover .menuOpenArrow:nth-child(1) {
+  width: 15px;
+  height: 2px;
+  transform: translateY(7px) translateX(16px) rotate(-140deg);
+}
+
+.hamburger:hover .menuOpenArrow:nth-child(2) {
+  height: 2px;
+}
+
+.hamburger:hover .menuOpenArrow:nth-child(3) {
+  width: 15px;
+  height: 2px;
+  transform: translateY(-7px) translateX(16px) rotate(140deg);
+  margin-bottom: -3px; /* アニメーションの際の調整 */
+}
+
+.flexContainer {
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  margin-top: 10px;
+  margin-right: calc(-1 * var(--paddings));
+  margin-left: calc(-1 * var(--paddings));
+  padding-right: var(--paddings);
+  padding-left: var(--paddings);
+}
+
+.flexContainer:hover {
+  background-color: #1b555a;
+}
+
+.pageName {
+  font-size: 14px;
+  color: white;
+}
+
+.mainContent {
+  background: #f6f8fa;
+  width: 100%;
+}
