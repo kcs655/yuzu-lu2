@@ -1,16 +1,18 @@
 'use client'
 
-import { FormEvent, useCallback, useRef, useState } from 'react'
+
+import { FormEvent, useCallback, useRef, useState,useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import supabase from '../../../../lib/supabase'
+import {supabase }from '../../../../lib/supabase'
 import { v4 as uuidv4 } from 'uuid'
 
-import useStore from '../../../store'
+
+import useStore from '../../../../store'
+
 
 const TextbookNew = () => {
-  const { supabase } = useSupabase()
   const router = useRouter()
-  const { user } = useStore()
+  const { user, setUser } = useStore()
   const titleRef = useRef<HTMLInputElement>(null!)
   const authorRef = useRef<HTMLInputElement>(null!)
   const subjectRef = useRef<HTMLInputElement>(null!)
@@ -18,9 +20,18 @@ const TextbookNew = () => {
   const detailsRef = useRef<HTMLTextAreaElement>(null!)
   const [image, setImage] = useState<File>(null!)
 
+  useEffect(() => { 
+    const fetchUser = async () => { 
+      const { data: { user } } = await supabase.auth.getUser() 
+      setUser({ id: user?.id, email: user?.email }) 
+    } 
+    fetchUser() 
+}, [setUser])
+
   // 画像アップロード
   const onUploadImage = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
+
 
     if (!files || files?.length === 0) {
       return
@@ -28,23 +39,28 @@ const TextbookNew = () => {
     setImage(files[0])
   }, [])
 
+
   // 送信
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-
+    console.log('onSubmit called');
     if (user.id) {
       // supabaseストレージに画像アップロード
       const { data: storageData, error: storageError } = await supabase.storage
         .from('textbook')
         .upload(`${user.id}/${uuidv4()}`, image)
 
+
       if (storageError) {
         alert(storageError.message)
         return
       }
-
+      console.log('ユーザーID:', user.id)
+      console.log('タイトル:', titleRef.current.value)
+      console.log('ストレージデータ:', storageData)
       // 画像URL取得
       const { data: urlData } = await supabase.storage.from('textbook').getPublicUrl(storageData.path)
+
 
       // 教科書データを新規作成
       const { error: insertError } = await supabase.from('textbook').insert({
@@ -57,16 +73,18 @@ const TextbookNew = () => {
         user_id: user.id,
       })
 
+
       if (insertError) {
         alert(insertError.message)
         return
       }
-
+      console.log('データが正常に挿入されました。')
       // トップページに遷移
-      router.push('/')
+      router.push('/mypage')
       router.refresh()
     }
   }
+
 
   return (
     <div className="max-w-screen-md mx-auto">
@@ -83,6 +101,7 @@ const TextbookNew = () => {
           />
         </div>
 
+
         <div className="mb-5">
           <div className="text-sm mb-1">著者</div>
           <input
@@ -93,6 +112,7 @@ const TextbookNew = () => {
             placeholder="Author"
           />
         </div>
+
 
         <div className="mb-5">
           <div className="text-sm mb-1">科目</div>
@@ -105,6 +125,7 @@ const TextbookNew = () => {
           />
         </div>
 
+
         <div className="mb-5">
           <div className="text-sm mb-1">学年</div>
           <input
@@ -115,6 +136,7 @@ const TextbookNew = () => {
             placeholder="Grade"
           />
         </div>
+
 
         <div className="mb-5">
           <div className="text-sm mb-1">詳細</div>
@@ -127,10 +149,12 @@ const TextbookNew = () => {
           />
         </div>
 
+
         <div className="mb-5">
           <div className="text-sm mb-1">画像</div>
           <input type="file" id="image" onChange={onUploadImage} />
         </div>
+
 
         <div className="text-center mb-5">
           <button
@@ -145,4 +169,8 @@ const TextbookNew = () => {
   )
 }
 
+
 export default TextbookNew
+
+
+

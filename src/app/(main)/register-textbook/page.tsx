@@ -1,12 +1,7 @@
 "use client";
-
+ import TextbookNew from "@/app/components/register/page";
 const Dashboard = () => {
-  return (
-    <div>
-      <h1>教科書登録</h1>
-      <p>教科書を登録するところです</p>
-    </div>
-  );
-};
+  return <TextbookNew/>
+}
 
 export default Dashboard;
