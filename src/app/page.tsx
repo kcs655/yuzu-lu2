@@ -7,6 +7,21 @@ export default function Home() {
 
   return (
     <div style={styles.container}>
+      
+
+      {/* アイコン画像 */}
+      <img
+        src="images/icon1.webp" // アップロードされたアイコンのURLに置き換えてください
+        alt="Yuzu=Lu アイコン"
+        style={{
+          width: "400px",
+          height: "400px",
+          marginBottom: "20px",
+          borderRadius: "10px",
+          objectFit: "cover", // 型エラーを防ぐためにここで明示
+        }}
+      />
+
       {/* ボタン */}
       <div style={styles.buttonContainer}>
         <button
