@@ -2,7 +2,8 @@
 import { FC, memo, ReactNode, useState } from "react";
 import Link from "next/link";
 import styles from "./Layout.module.css";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabase"; // supabaseインスタンスへのパスはプロジェクトに合わせて変更してください。
 
 type Props = {
   children: ReactNode;
@@ -39,13 +40,27 @@ const navigations: Navigation[] = [
 /* eslint-disable-next-line react/display-name */
 export const Layout: FC<Props> = memo((props) => {
   const { children } = props;
-
   const [menuOpen, setMenuOpen] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const Pathname = usePathname();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const isPageActive = (pagePath: string): boolean => {
-    return pagePath === Pathname;
+    return pagePath === pathname;
+  };
+
+  // ここでLogoutのロジックを組み込み
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error(error.message);
+    } else {
+      console.log("User logged out");
+      alert("ログアウトしました。");
+      router.refresh();
+      router.push("/");
+    }
   };
 
   return (
@@ -82,10 +97,75 @@ export const Layout: FC<Props> = memo((props) => {
             </a>
           </Link>
         ))}
+
+        {/* ログアウトボタン */}
+        <div
+          className={styles.flexContainer}
+          style={{ cursor: 'pointer', marginTop: 'auto', padding: '1rem' }}
+          onClick={() => setShowLogoutConfirm(true)}
+        >
+          {menuOpen && <p className={styles.pageName}>ログアウト</p>}
+        </div>
       </aside>
 
-      <main className={styles.mainContent}>{children}</main>
+      <main className={styles.mainContent}>
+        {children}
+
+        {/* ログアウト確認ダイアログ */}
+        {showLogoutConfirm && (
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}
+          >
+            <div style={{ 
+              background: '#fff', 
+              padding: '2rem', 
+              borderRadius: '8px', 
+              textAlign: 'center',
+              width: '300px'
+            }}>
+              <p>ログアウトしますか？</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setShowLogoutConfirm(false);
+                  }}
+                  style={{
+                    background: '#0070f3',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '0.5rem 1rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  はい
+                </button>
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  style={{
+                    background: '#ccc',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '0.5rem 1rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  いいえ
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 });
+
 export default Layout;

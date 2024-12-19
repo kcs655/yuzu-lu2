@@ -28,7 +28,27 @@ const Login = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* ヘッダー */}
-      <header style={{ padding: '1rem', background: '#f5f5f5', textAlign: 'center' }}>
+      <header style={{ 
+        padding: '1rem', 
+        background: '#f5f5f5', 
+        display: 'flex', 
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative'
+      }}>
+        {/* 左上にホームへ戻るリンク */}
+        <div style={{ position: 'absolute', left: '1rem' }}>
+          <Link 
+            href="/" 
+            style={{ 
+              color: '#0070f3', 
+              
+              cursor: 'pointer' 
+            }}
+          >
+          ＜ 
+          </Link>
+        </div>
         <h1>Yuzu➡Lu</h1>
       </header>
 
