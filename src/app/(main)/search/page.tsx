@@ -1,12 +1,7 @@
 "use client";
-
+ import Search from "@/app/components/search/searchform";
 const Dashboard = () => {
-  return (
-    <div>
-      <h1>検索</h1>
-      <p>教科書を検索するところです</p>
-    </div>
-  );
-};
+  return <Search/>
+}
 
 export default Dashboard;
