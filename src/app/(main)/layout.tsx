@@ -27,6 +27,10 @@ const navigations: Navigation[] = [
     path: "/register-textbook",
   },
   {
+    pageName: "欲しい教科書",
+    path: "/wish-list",
+  },
+  {
     pageName: "設定",
     path: "/settings",
   },
