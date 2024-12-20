@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
-import BookItem from "@/app/components/mypage/mytextbook";
+import SearchItem from "@/app/components/search/search";
 import useStore from "../../../../store";
 import { BookType } from "../../../../types";
 import { useRouter } from "next/navigation"; // useRouterをnext/navigationからimport
 
-const MainPage = () => {
+const SearchPage = () => {
   const router = useRouter();
   const { user, setUser } = useStore();
   const [books, setBooks] = useState<BookType[]>([]);
@@ -73,10 +73,10 @@ const MainPage = () => {
   return (
     <div className="grid grid-cols-3 gap-5">
       {books.map((book) => (
-        <BookItem key={book.id} book={book} />
+        <SearchItem key={book.id} book={book} />
       ))}
     </div>
   );
 };
 
-export default MainPage;
+export default SearchPage;
