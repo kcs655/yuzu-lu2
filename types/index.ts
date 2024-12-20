@@ -11,3 +11,10 @@ export interface BookType {
     created_at: string
   }
   
+  export interface WishType {
+    id: string
+    user_id: string
+    textbook_id: string
+    updated_at: string
+    created_at: string
+  }
