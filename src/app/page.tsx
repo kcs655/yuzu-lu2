@@ -11,7 +11,7 @@ export default function Home() {
 
       {/* アイコン画像 */}
       <img
-        src="images/icon1.webp" // アップロードされたアイコンのURLに置き換えてください
+        src="images/icon1.png" // アップロードされたアイコンのURLに置き換えてください
         alt="Yuzu=Lu アイコン"
         style={{
           width: "400px",
