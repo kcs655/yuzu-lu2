@@ -73,7 +73,7 @@ const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
   };
 
   const ogImage = useMemo(() => {
-    return book.image_url || "";
+    return book.image_url || "/images/noimage.png";
   }, [book.image_url]);
 
   return (
@@ -102,7 +102,7 @@ const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
       {book.image_url && (
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <img
-            src={book.image_url}
+            src={ogImage}
             alt={book.title}
             style={{ maxWidth: "100%", height: "auto" }}
           />

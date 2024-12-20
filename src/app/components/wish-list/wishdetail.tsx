@@ -19,6 +19,7 @@ const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
   const { user, setUser } = useStore();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isRequestDisabled, setIsRequestDisabled] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -37,15 +38,35 @@ const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
     fetchUser();
   }, [setUser]);
 
+  useEffect(() => {
+    const checkRequest = async () => {
+      if (user?.id) {
+        const { data: requestData, error } = await supabase
+          .from("request")
+          .select("*")
+          .eq("requester_id", user.id)
+          .eq("textbook_id", book.id);
+
+        if (requestData && requestData.length > 0) {
+          setIsRequestDisabled(true);
+        }
+
+        if (error) {
+          console.error("Error checking request:", error.message);
+        }
+      }
+    };
+
+    checkRequest();
+  }, [user?.id, book.id]);
+
   const handleRequest = async () => {
     if (user.id) {
-      const { data: requestData, error: requestError } = await supabase
-        .from("request")
-        .insert({
-          id: uuidv4(),
-          requester_id: user.id,
-          textbook_id: book.id,
-        });
+      const { error: requestError } = await supabase.from("request").insert({
+        id: uuidv4(),
+        requester_id: user.id,
+        textbook_id: book.id,
+      });
 
       if (requestError) {
         setError(requestError.message);
@@ -53,6 +74,7 @@ const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
       } else {
         setMessage("リクエストが送信されました。");
         setError("");
+        setIsRequestDisabled(true); // ボタンを無効化
       }
     } else {
       setError("ユーザー情報が取得できませんでした。");
@@ -76,7 +98,7 @@ const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
   };
 
   const ogImage = useMemo(() => {
-    return book.image_url || "";
+    return book.image_url || "/images/noimage.png";
   }, [book.image_url]);
 
   return (
@@ -102,15 +124,13 @@ const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
         authorName="Author Name" // 適切な著者名に修正
         description={book.details}
       />
-      {book.image_url && (
-        <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <img
-            src={book.image_url}
-            alt={book.title}
-            style={{ maxWidth: "100%", height: "auto" }}
-          />
-        </div>
-      )}
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        <img
+          src={ogImage}
+          alt={book.title}
+          style={{ maxWidth: "100%", height: "auto" }}
+        />
+      </div>
       <h1
         style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}
       >
@@ -129,7 +149,12 @@ const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <button
           onClick={handleRequest}
-          className="w-full text-white bg-yellow-500 hover:brightness-110 rounded py-1 px-8"
+          className={`w-full text-white ${
+            isRequestDisabled
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-yellow-500 hover:brightness-110"
+          } rounded py-1 px-8`}
+          disabled={isRequestDisabled}
         >
           リクエスト
         </button>

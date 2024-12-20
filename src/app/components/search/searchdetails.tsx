@@ -19,6 +19,7 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
   const { user, setUser } = useStore();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isDisabled, setIsDisabled] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -37,12 +38,35 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
     fetchUser();
   }, [setUser]);
 
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (user?.id) {
+        const { data: wishlistData, error } = await supabase
+          .from("wantbook")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("textbook_id", book.id);
+
+        if (wishlistData && wishlistData.length > 0) {
+          setIsDisabled(true);
+        }
+
+        if (error) {
+          console.error("Error checking wishlist:", error.message);
+        }
+      }
+    };
+
+    checkWishlist();
+  }, [user?.id, book.id]);
+
   const handleAddToWishlist = async () => {
     if (user.id) {
       const { error: insertError } = await supabase.from("wantbook").insert({
         id: uuidv4(),
         user_id: user.id,
         textbook_id: book.id,
+        is_disabled: true, // ボタンが押された後はtrueに設定
       });
 
       if (insertError) {
@@ -51,6 +75,7 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
       } else {
         setMessage("教科書が欲しいリストに追加されました。");
         setError("");
+        setIsDisabled(true); // ボタンを無効化
       }
     } else {
       setError("ユーザー情報が取得できませんでした。");
@@ -74,7 +99,7 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
   };
 
   const ogImage = useMemo(() => {
-    return book.image_url || "";
+    return book.image_url || "/images/noimage.png";
   }, [book.image_url]);
 
   return (
@@ -100,15 +125,13 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
         authorName="Author Name" // 適切な著者名に修正
         description={book.details}
       />
-      {book.image_url && (
-        <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <img
-            src={book.image_url}
-            alt={book.title}
-            style={{ maxWidth: "100%", height: "auto" }}
-          />
-        </div>
-      )}
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        <img
+          src={ogImage}
+          alt={book.title}
+          style={{ maxWidth: "100%", height: "auto" }}
+        />
+      </div>
       <h1
         style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}
       >
@@ -127,7 +150,12 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <button
           onClick={handleAddToWishlist}
-          className="w-full text-white bg-yellow-500 hover:brightness-110 rounded py-1 px-8"
+          className={`w-full text-white ${
+            isDisabled
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-yellow-500 hover:brightness-110"
+          } rounded py-1 px-8`}
+          disabled={isDisabled}
         >
           欲しい教科書リストに追加
         </button>

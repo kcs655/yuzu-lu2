@@ -1,12 +1,11 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../../lib/supabase";
 import { BookType } from "../../../../../types";
-import WishDetail from "@/app/components/wish-list/wishdetail";
+import SearchDetail from "@/app/components/search/searchdetails";
 import { useParams } from "next/navigation";
 
-const WishDetailPage = () => {
+const BookDetailPage = () => {
   const params = useParams<{ id: string }>();
   const { id } = params;
   const [bookData, setBookData] = useState<BookType | null>(null);
@@ -43,7 +42,7 @@ const WishDetailPage = () => {
     return <div className="text-center">教科書が存在しません</div>;
   }
 
-  return <WishDetail book={bookData} isMyBook={false} />;
+  return <SearchDetail book={bookData} isMyBook={true} />;
 };
 
-export default WishDetailPage;
+export default BookDetailPage;

@@ -1,13 +1,12 @@
-"use client"
+"use client";
 
-import { BookType } from "../../../../types"
-import { format } from "date-fns"
-import Image from "next/image"
-import Link from "next/link"
-
+import { BookType } from "../../../../types";
+import { format } from "date-fns";
+import Image from "next/image";
+import Link from "next/link";
 
 interface BookItemProps {
-  book: BookType 
+  book: BookType;
 }
 
 const BookItem = ({ book }: BookItemProps) => {
@@ -16,7 +15,7 @@ const BookItem = ({ book }: BookItemProps) => {
       <Link href={`mypage/${book.id}`}>
         <div className="aspect-video relative overflow-hidden">
           <Image
-            src={book.image_url || "/noImage.png"}
+            src={book.image_url || "/images/noimage.png"}
             className="rounded-t object-cover transition-transform duration-100 ease-in-out hover:scale-105"
             alt="image"
             width={640}
@@ -33,7 +32,7 @@ const BookItem = ({ book }: BookItemProps) => {
         <div className="font-bold">{book.title}</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default BookItem
+export default BookItem;

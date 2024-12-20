@@ -15,7 +15,7 @@ const WishItem = ({ book }: BookItemProps) => {
       <Link href={`wish-list/${book.id}`}>
         <div className="aspect-video relative overflow-hidden">
           <Image
-            src={book.image_url || "/noImage.png"}
+            src={book.image_url || "/images/noimage.png"}
             className="rounded-t object-cover transition-transform duration-100 ease-in-out hover:scale-105"
             alt="image"
             width={640}
