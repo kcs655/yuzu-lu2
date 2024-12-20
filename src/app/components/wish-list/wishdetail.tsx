@@ -9,12 +9,12 @@ import { ArticleJsonLd, NextSeo } from "next-seo";
 import { v4 as uuidv4 } from "uuid";
 import useStore from "../../../../store";
 
-interface BookDetailProps {
+interface WishDetailProps {
   book: BookType;
   isMyBook: boolean;
 }
 
-const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
+const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
   const router = useRouter();
   const { user, setUser } = useStore();
   const [error, setError] = useState("");
@@ -37,19 +37,21 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
     fetchUser();
   }, [setUser]);
 
-  const handleAddToWishlist = async () => {
+  const handleRequest = async () => {
     if (user.id) {
-      const { error: insertError } = await supabase.from("wantbook").insert({
-        id: uuidv4(),
-        user_id: user.id,
-        textbook_id: book.id,
-      });
+      const { data: requestData, error: requestError } = await supabase
+        .from("request")
+        .insert({
+          id: uuidv4(),
+          requester_id: user.id,
+          textbook_id: book.id,
+        });
 
-      if (insertError) {
-        setError(insertError.message);
+      if (requestError) {
+        setError(requestError.message);
         setMessage("");
       } else {
-        setMessage("教科書が欲しいリストに追加されました。");
+        setMessage("リクエストが送信されました。");
         setError("");
       }
     } else {
@@ -126,10 +128,10 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
       </div>
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <button
-          onClick={handleAddToWishlist}
+          onClick={handleRequest}
           className="w-full text-white bg-yellow-500 hover:brightness-110 rounded py-1 px-8"
         >
-          欲しい教科書リストに追加
+          リクエスト
         </button>
         {error && (
           <div style={{ color: "red", textAlign: "center" }}>{error}</div>
@@ -142,4 +144,4 @@ const SearchDetail = ({ book, isMyBook }: BookDetailProps) => {
   );
 };
 
-export default SearchDetail;
+export default WishDetail;

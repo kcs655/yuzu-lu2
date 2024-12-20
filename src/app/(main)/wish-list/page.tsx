@@ -1,12 +1,13 @@
-"use client";
+import React from "react";
+import WishList from "@/app/components/wish-list/wish-list";
 
-const Dashboard = () => {
+const WishListPage = () => {
   return (
-    <div>
-      <h1>欲しい教科書</h1>
-      <p>欲しい教科書の一覧が表示されるところです</p>
+    <div className="max-w-screen-lg mx-auto p-5">
+      <h1 className="text-2xl font-bold mb-5">欲しい教科書リスト</h1>
+      <WishList />
     </div>
   );
 };
 
-export default Dashboard;
+export default WishListPage;
