@@ -3,14 +3,12 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../../../../lib/supabase";
 import { BookType } from "../../../../../types";
 import BookDetail from "@/app/components/mypage/Bookdetails"; // 必要に応じてパスを調整
+import { useParams } from "next/navigation";
 
-interface BookDetailPageProps {
-  params: {
-    id: string;
-  };
-}
 
-const BookDetailPage = ({ params }: BookDetailPageProps) => {
+
+const BookDetailPage = () => {
+  const params = useParams<{ id: string }>();
   const { id } = params;
   const [bookData, setBookData] = useState<BookType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
