@@ -32,6 +32,10 @@ const navigations: Navigation[] = [
     path: "/wish-list",
   },
   {
+    pageName: "チャット",
+    path: "/chats",
+  },
+  {
     pageName: "設定",
     path: "/settings",
   },
@@ -101,7 +105,7 @@ export const Layout: FC<Props> = memo((props) => {
         {/* ログアウトボタン */}
         <div
           className={styles.flexContainer}
-          style={{ cursor: 'pointer', marginTop: 'auto', padding: '1rem' }}
+          style={{ cursor: "pointer", marginTop: "auto", padding: "1rem" }}
           onClick={() => setShowLogoutConfirm(true)}
         >
           {menuOpen && <p className={styles.pageName}>ログアウト</p>}
@@ -113,35 +117,48 @@ export const Layout: FC<Props> = memo((props) => {
 
         {/* ログアウト確認ダイアログ */}
         {showLogoutConfirm && (
-          <div 
+          <div
             style={{
-              position: 'fixed',
-              top: 0, left: 0, right: 0, bottom: 0,
-              background: 'rgba(0,0,0,0.5)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            <div style={{ 
-              background: '#fff', 
-              padding: '2rem', 
-              borderRadius: '8px', 
-              textAlign: 'center',
-              width: '300px'
-            }}>
+            <div
+              style={{
+                background: "#fff",
+                padding: "2rem",
+                borderRadius: "8px",
+                textAlign: "center",
+                width: "300px",
+              }}
+            >
               <p>ログアウトしますか？</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "1rem",
+                }}
+              >
                 <button
                   onClick={() => {
                     handleLogout();
                     setShowLogoutConfirm(false);
                   }}
                   style={{
-                    background: '#0070f3',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '0.5rem 1rem',
-                    cursor: 'pointer'
+                    background: "#0070f3",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "0.5rem 1rem",
+                    cursor: "pointer",
                   }}
                 >
                   はい
@@ -149,12 +166,12 @@ export const Layout: FC<Props> = memo((props) => {
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
                   style={{
-                    background: '#ccc',
-                    color: '#000',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '0.5rem 1rem',
-                    cursor: 'pointer'
+                    background: "#ccc",
+                    color: "#000",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "0.5rem 1rem",
+                    cursor: "pointer",
                   }}
                 >
                   いいえ

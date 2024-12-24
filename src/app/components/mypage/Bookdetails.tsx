@@ -179,46 +179,49 @@ const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
       )}
       <div style={{ marginTop: "40px" }}>
         <h2>リクエスト一覧</h2>
-        {requests.length === 0 ? (
+        {requests.filter((request) => request.status === "wait").length ===
+        0 ? (
           <p>現在、待機中のリクエストはありません。</p>
         ) : (
-          requests.map((request) => (
-            <div key={request.id} style={{ marginBottom: "20px" }}>
-              <p>リクエストID: {request.id}</p>
-              <p>ステータス: {request.status}</p>
-              <div className="flex items-center justify-end space-x-3">
-                <button
-                  className="cursor-pointer"
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: "#5cb85c",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                    marginRight: "10px",
-                  }}
-                  onClick={() => handleStatusChange(request.id, "consent")}
-                >
-                  承諾
-                </button>
-                <button
-                  className="cursor-pointer"
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: "#d9534f",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleStatusChange(request.id, "rejection")}
-                >
-                  拒否
-                </button>
+          requests
+            .filter((request) => request.status === "wait")
+            .map((request) => (
+              <div key={request.id} style={{ marginBottom: "20px" }}>
+                <p>リクエストID: {request.id}</p>
+                <p>ステータス: {request.status}</p>
+                <div className="flex items-center justify-end space-x-3">
+                  <button
+                    className="cursor-pointer"
+                    style={{
+                      padding: "10px 20px",
+                      backgroundColor: "#5cb85c",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                      marginRight: "10px",
+                    }}
+                    onClick={() => handleStatusChange(request.id, "consent")}
+                  >
+                    承諾
+                  </button>
+                  <button
+                    className="cursor-pointer"
+                    style={{
+                      padding: "10px 20px",
+                      backgroundColor: "#d9534f",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "5px",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleStatusChange(request.id, "rejection")}
+                  >
+                    拒否
+                  </button>
+                </div>
               </div>
-            </div>
-          ))
+            ))
         )}
       </div>
     </div>
