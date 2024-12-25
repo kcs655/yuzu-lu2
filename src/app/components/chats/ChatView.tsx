@@ -9,11 +9,10 @@ export default function ChatView() {
   const { user: currentUser, setUser } = useStore(); // Zustandのストアからユーザー情報を取得
   const [requests, setRequests] = useState<any[]>([]);
   const [currentRequestID, setCurrentRequestID] = useState<string | null>(null);
-  const [reloadFlg, setReloadFlg] = useState<boolean>(false); // setReloadFlg を追加
 
   useEffect(() => {
     getRequests();
-  }, [reloadFlg]);
+  }, []);
 
   const getRequests = async () => {
     const { data: userData } = await supabase.auth.getUser();
@@ -88,7 +87,7 @@ export default function ChatView() {
               return null;
             }
 
-            // `user_id` と一致する `profiles` の `email` を取得
+            // `user_id` の外部キーである `profiles` の `email` を取得
             const { data: profileData, error: profileError } = await supabase
               .from("profiles")
               .select("email")
@@ -145,7 +144,6 @@ export default function ChatView() {
 
   const handleRequestClick = (id: string) => {
     setCurrentRequestID(id);
-    setReloadFlg((prev) => !prev); // メッセージ送信後にリロードフラグをトグルして再取得
   };
 
   return (
@@ -163,10 +161,7 @@ export default function ChatView() {
         ))}
       </ul>
       <div className="w-full bg-gray-200 border-l p-4">
-        <ChatList
-          request_id={currentRequestID}
-          setReloadFlg={setReloadFlg} // setReloadFlg を渡す
-        />
+        <ChatList request_id={currentRequestID} />
       </div>
     </div>
   );

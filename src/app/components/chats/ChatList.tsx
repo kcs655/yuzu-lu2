@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, Dispatch, SetStateAction } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
 import SendButton from "./SendButton";
 import useStore from "../../../../store"; // Zustandのストアをインポート
 
-type ChatMessage = {
+export type ChatMessage = {
   id: string;
   sender_id: string;
   message: string;
@@ -14,19 +14,16 @@ type ChatMessage = {
 
 type Props = {
   request_id: string | null;
-  setReloadFlg: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function ChatList({ request_id, setReloadFlg }: Props) {
+export default function ChatList({ request_id }: Props) {
   const { user } = useStore(); // Zustandのストアからユーザー情報を取得
   const [chatData, setChatData] = useState<ChatMessage[]>([]);
-  const [reloadFlg, setLocalReloadFlg] = useState<boolean>(false);
 
   useEffect(() => {
     if (request_id == null || user == null) return;
     getChatData();
-    setLocalReloadFlg(false);
-  }, [request_id, reloadFlg]);
+  }, [request_id]);
 
   const getChatData = async () => {
     const { data, error } = await supabase
@@ -36,27 +33,10 @@ export default function ChatList({ request_id, setReloadFlg }: Props) {
 
     if (error) {
       console.log(error);
-      return [];
-    }
-
-    setChatData(data as ChatMessage[]);
-
-    // チャットリストにユーザーを追加する条件
-    const { data: requestData, error: requestError } = await supabase
-      .from("request")
-      .select("requester_id, textbook_id")
-      .eq("id", request_id)
-      .eq("status", "consent");
-
-    if (requestError || !requestData || requestData.length === 0) {
-      console.log(requestError);
       return;
     }
 
-    const request = requestData[0];
-    if (user.id === request.requester_id || user.id === request.textbook_id) {
-      // リストにユーザーを追加するロジックをここに追加
-    }
+    setChatData(data as ChatMessage[]);
   };
 
   return (
@@ -83,7 +63,7 @@ export default function ChatList({ request_id, setReloadFlg }: Props) {
           </li>
         ))}
       </ul>
-      <SendButton request_id={request_id} setReloadFlg={setReloadFlg} />
+      <SendButton request_id={request_id} setChatData={setChatData} />
     </div>
   );
 }
