@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Dispatch, SetStateAction } from "react";
 import { supabase } from "../../../../lib/supabase";
 import SendButton from "./SendButton";
 import useStore from "../../../../store"; // Zustandのストアをインポート
@@ -14,18 +14,18 @@ type ChatMessage = {
 
 type Props = {
   request_id: string | null;
+  setReloadFlg: Dispatch<SetStateAction<boolean>>;
 };
 
-export default function ChatList({ request_id }: Props) {
+export default function ChatList({ request_id, setReloadFlg }: Props) {
   const { user } = useStore(); // Zustandのストアからユーザー情報を取得
   const [chatData, setChatData] = useState<ChatMessage[]>([]);
-  // リロードのためにトグルするやつ。
-  const [reloadFlg, setReloadFlg] = useState<boolean>(false);
+  const [reloadFlg, setLocalReloadFlg] = useState<boolean>(false);
 
   useEffect(() => {
-    if (request_id == null || !user?.id) return; // user.id が null でないことを確認
+    if (request_id == null || user == null) return;
     getChatData();
-    setReloadFlg(false);
+    setLocalReloadFlg(false);
   }, [request_id, reloadFlg]);
 
   const getChatData = async () => {
@@ -40,6 +40,23 @@ export default function ChatList({ request_id }: Props) {
     }
 
     setChatData(data as ChatMessage[]);
+
+    // チャットリストにユーザーを追加する条件
+    const { data: requestData, error: requestError } = await supabase
+      .from("request")
+      .select("requester_id, textbook_id")
+      .eq("id", request_id)
+      .eq("status", "consent");
+
+    if (requestError || !requestData || requestData.length === 0) {
+      console.log(requestError);
+      return;
+    }
+
+    const request = requestData[0];
+    if (user.id === request.requester_id || user.id === request.textbook_id) {
+      // リストにユーザーを追加するロジックをここに追加
+    }
   };
 
   return (

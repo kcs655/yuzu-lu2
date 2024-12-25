@@ -13,7 +13,7 @@ export default function SendButton({ request_id, setReloadFlg }: Props) {
   const [message, setMessage] = useState("");
 
   const onSubmit = async () => {
-    if (user == null || request_id == null) return;
+    if (user == null || request_id == null || message.trim() === "") return;
 
     const { error } = await supabase.from("apply_message").insert({
       sender_id: user.id,
@@ -25,6 +25,17 @@ export default function SendButton({ request_id, setReloadFlg }: Props) {
 
     if (error) {
       console.log(error);
+      return;
+    }
+
+    // リクエストにメッセージ送信者を追加
+    const { error: requestError } = await supabase
+      .from("request")
+      .update({ last_message_sender: user.id })
+      .eq("id", request_id);
+
+    if (requestError) {
+      console.log(requestError);
       return;
     }
 
