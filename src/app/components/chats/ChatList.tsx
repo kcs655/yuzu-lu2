@@ -29,7 +29,8 @@ export default function ChatList({ request_id }: Props) {
     const { data, error } = await supabase
       .from("apply_message")
       .select()
-      .eq("request_id", request_id);
+      .eq("request_id", request_id)
+      .order("created_at", { ascending: true }); // メッセージを時間順に並べ替え
 
     if (error) {
       console.log(error);
