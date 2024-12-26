@@ -17,18 +17,35 @@ export default function SendButton({ request_id, setChatData }: Props) {
   const onSubmit = async () => {
     if (user == null || request_id == null || message.trim() === "") return;
 
+    // request_id を用いて request テーブルから requester_id (receiver_id) を取得
+    const { data: requestData, error: requestError } = await supabase
+      .from("request")
+      .select("requester_id")
+      .eq("id", request_id)
+      .single();
+
+    if (requestError) {
+      console.error("Error fetching request data:", requestError);
+      return;
+    }
+
+    const messageData = {
+      sender_id: user.id,
+      receiver_id: requestData.requester_id, // receiver_id を設定
+      request_id: request_id,
+      message: message,
+      created_at: new Date().toISOString(), // 日付を ISO 形式にする
+      updated_at: new Date().toISOString(), // 日付を ISO 形式にする
+      delete_flg: false, // フラグをデフォルト値として設定
+    };
+
     const { data, error } = await supabase
       .from("apply_message")
-      .insert({
-        sender_id: user.id,
-        request_id: request_id,
-        message: message,
-        created_at: new Date(),
-      })
-      .select(); // 追加: 新しいメッセージを取得
+      .insert(messageData)
+      .select();
 
     if (error) {
-      console.log(error);
+      console.error("Error inserting message:", error);
       return;
     }
 
