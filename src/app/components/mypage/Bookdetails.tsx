@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
 import { BookType, RequestType } from "../../../../types";
 import Image from "next/image";
@@ -21,6 +22,7 @@ const deleteBook = async ({ bookId, imageUrl, userId }: any) => {
 };
 
 const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
+  const router = useRouter(); // 追加
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [requests, setRequests] = useState<RequestType[]>([]);
@@ -82,6 +84,7 @@ const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
         });
 
         if (res?.error) {
+          console.error(`Delete error: ${JSON.stringify(res.error)}`);
           setError(res.error.message);
           setIsLoading(false);
           return;
@@ -89,8 +92,12 @@ const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
 
         toast.success("教科書を削除しました");
         setIsLoading(false);
+
+        // ページをリフレッシュしてmypageに移動
+        router.push("/mypage");
+        router.refresh();
       } catch (error) {
-        console.error(error);
+        console.error("Unexpected error:", error);
         setError("エラーが発生しました");
         setIsLoading(false);
       }
