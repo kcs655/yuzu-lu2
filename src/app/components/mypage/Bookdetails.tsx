@@ -16,14 +16,9 @@ interface BookDetailProps {
   isMyBook: boolean;
 }
 
-const deleteBook = async ({ bookId, imageUrl, userId }: any) => {
-  const { error } = await supabase.from("textbook").delete().eq("id", bookId);
-  return { error };
-};
-
-const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
-  const router = useRouter(); // 追加
-  const [error, setError] = useState("");
+const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
+  const router = useRouter();
+  const [error, setError] = useState<string>("");
   const [isPending, startTransition] = useTransition();
   const [requests, setRequests] = useState<RequestType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,7 +37,7 @@ const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
       }
 
       console.log("Fetched requests:", requestData);
-      setRequests(requestData);
+      setRequests(requestData as RequestType[]);
       setIsLoading(false);
     };
 
@@ -77,17 +72,34 @@ const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
 
     startTransition(async () => {
       try {
-        const res = await deleteBook({
-          bookId: book.id,
-          imageUrl: book.image_url,
-          userId: book.user_id,
-        });
+        // 教科書削除
+        const { error } = await supabase
+          .from("textbook")
+          .delete()
+          .eq("id", book.id);
 
-        if (res?.error) {
-          console.error(`Delete error: ${JSON.stringify(res.error)}`);
-          setError(res.error.message);
+        if (error) {
+          console.error(`Delete error: ${JSON.stringify(error)}`);
+          setError(error.message);
           setIsLoading(false);
           return;
+        }
+
+        // 画像がある場合、画像を削除
+        if (book.image_url) {
+          const fileName = book.image_url.split("/").slice(-1)[0];
+          const { error: storageError } = await supabase.storage
+            .from("textbook")
+            .remove([`${book.user_id}/${fileName}`]);
+
+          if (storageError) {
+            console.error(
+              `Storage delete error: ${JSON.stringify(storageError)}`
+            );
+            setError(storageError.message);
+            setIsLoading(false);
+            return;
+          }
         }
 
         toast.success("教科書を削除しました");
@@ -96,8 +108,8 @@ const BookDetail = ({ book, isMyBook }: BookDetailProps) => {
         // ページをリフレッシュしてmypageに移動
         router.push("/mypage");
         router.refresh();
-      } catch (error) {
-        console.error("Unexpected error:", error);
+      } catch (err) {
+        console.error(err);
         setError("エラーが発生しました");
         setIsLoading(false);
       }
