@@ -16,7 +16,7 @@ const subNavigation = [
   {
     name: "メールアドレス変更",
     icon: Mail,
-    href: "/settings/email",
+    href: "/settings/Email",
   },
   {
     name: "パスワード変更",
