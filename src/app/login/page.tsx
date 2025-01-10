@@ -3,6 +3,7 @@ import { useState, FormEvent } from "react";
 import { supabase } from "../../../lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from 'next/image';
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -49,7 +50,14 @@ const Login = () => {
           ＜ 
           </Link>
         </div>
-        <h1>Yuzu➡Lu</h1>
+        <h1 style={{ margin: 0 }}>
+        <Image
+          src="/images/logo.png"  // ここは実際の画像パスに変えてください
+          alt="Yuzu➡Lu"
+          width={200}                  // 画像サイズに合わせて変更
+          height={200}                 // 画像サイズに合わせて変更
+        />
+      </h1>
       </header>
 
       {/* メインコンテンツ */}
