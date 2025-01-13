@@ -52,7 +52,10 @@ export const EmailSchema = z.object({
   }),
 });
 
-export const BlogSchema = z.object({
+export const TextbookSchema = z.object({
   title: z.string().min(1, { message: "タイトルを入力してください" }),
-  content: z.string().min(1, { message: "内容を入力してください" }),
+  author: z.string().optional(),
+  subject: z.string().optional(),
+  grade: z.number().optional(),
+  details: z.string().optional(),
 });
