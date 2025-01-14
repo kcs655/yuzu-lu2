@@ -5,9 +5,8 @@ import Link from "next/link";
 import styles from "./Layout.module.css";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
-import * as JSX from 'react';
 
-import { favoriteImage, chatImage, UploadedImage } from "../../../styles/icon";
+import { UploadedImage } from "../../../styles/icon";
 
 
 type Props = {
