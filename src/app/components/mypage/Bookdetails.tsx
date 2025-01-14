@@ -178,6 +178,15 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
         </h2>
         <p>{parse(formatDescription(book.details))}</p>
       </div>
+      <div style={{ marginBottom: "20px" }}>
+        <h2
+          style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}
+        >
+          Subject & Grade
+        </h2>
+        <p>Subject: {book.subject ? book.subject : "未設定"}</p>
+        <p>Grade: {book.grade ? book.grade : "未設定"}</p>
+      </div>
       {isMyBook && (
         <div className="flex items-center justify-end space-x-3">
           <Link href={`/mypage/${book.id}/edit`}>
