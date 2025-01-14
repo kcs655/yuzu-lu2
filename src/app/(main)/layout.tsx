@@ -121,7 +121,28 @@ export const Layout: FC<Props> = memo((props) => {
           style={{ cursor: "pointer", marginTop: "auto", padding: "1rem" }}
           onClick={() => setShowLogoutConfirm(true)}
         >
-          {menuOpen && <p className={styles.pageName}>ログアウト</p>}
+           {menuOpen && (
+    <p 
+    className={styles.pageName} 
+    style={{
+      display: "flex",         // Flexboxにする
+      alignItems: "center",    // 垂直方向に中央揃え
+      margin: 0                // デフォルトマージン削除（必要なら）
+    }}
+  >
+      {/* exitマークアイコン */}
+      <img
+        src="/images/logout.png"      // 実際のパスに合わせて変更
+        alt="Exit Icon"
+        style={{
+          width: "24px",
+          height: "24px",
+          marginRight: "8px",       // テキストとの隙間
+        }}
+      />
+      ログアウト
+    </p>
+  )}
         </div>
       </aside>
 
