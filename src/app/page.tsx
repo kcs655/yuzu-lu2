@@ -62,7 +62,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     filter: "brightness(1.0)", 
   },
   logoWrapper: {
-    backgroundColor: "rgba(255, 255, 255, 0.60)", 
+    backgroundColor: "rgba(255, 255, 255, 0.70)", 
     padding: "20px",
     borderRadius: "10px",
     /* 影で強調したい場合 */
