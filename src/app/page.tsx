@@ -11,7 +11,7 @@ export default function Home() {
 
       {/* アイコン画像 */}
       <img
-        src="images/icon7.png" // アップロードされたアイコンのURLに置き換えてください
+        src="images/icon-02.png" // アップロードされたアイコンのURLに置き換えてください
         alt="Yuzu=Lu アイコン"
         style={{
           width: "400px",
@@ -51,7 +51,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
-    backgroundColor: "#d7d8c8",
+    backgroundColor: "#ffffff",
   },
   buttonContainer: {
     display: "flex",
