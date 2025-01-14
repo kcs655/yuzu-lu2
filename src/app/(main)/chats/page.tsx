@@ -6,14 +6,9 @@ import { supabase } from "../../../../lib/supabase";
 import ChatView from "@/app/components/chats/ChatView";
 import useStore from "../../../../store"; // Zustandのストアをインポート
 
-interface SearchParams {
-  companyid: string;
-}
-
 export default function ChatsPage({
- 
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<{ companyid: string }>;
 }) {
   const { setUser } = useStore(); // Zustandのストアからユーザー設定関数を取得
   const router = useRouter();
