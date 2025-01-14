@@ -25,17 +25,7 @@ interface TextbookType {
   created_at: string;
 }
 
-interface EditTextbookProps {
-  id: string;
-  user_id: string;
-  title: string;
-  author?: string;
-  subject?: string;
-  grade?: number;
-  details?: string;
-  image_url?: string;
-  base64Image?: string;
-}
+
 
 const TextbookEdit = ({ textbook }: { textbook: TextbookType }) => {
   const router = useRouter();

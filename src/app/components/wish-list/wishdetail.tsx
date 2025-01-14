@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { BookType } from "../../../../types";
 import { supabase } from "../../../../lib/supabase";
 import parse from "html-react-parser";
@@ -11,11 +10,9 @@ import useStore from "../../../../store";
 
 interface WishDetailProps {
   book: BookType;
-  isMyBook: boolean;
 }
 
-const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
-  const router = useRouter();
+const WishDetail = ({ book }: WishDetailProps) => {
   const { user, setUser } = useStore();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -93,7 +90,7 @@ const WishDetail = ({ book, isMyBook }: WishDetailProps) => {
 
   const formatDescription = (description: string): string => {
     if (!description) return "未設定";
-    let sanitizedDescription = description.replace(/\n/g, "<br/>");
+    const sanitizedDescription = description.replace(/\n/g, "<br/>");
     return sanitizedDescription;
   };
 
