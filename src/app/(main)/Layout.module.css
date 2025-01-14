@@ -103,3 +103,14 @@
   background: #f6f8fa;
   width: 100%;
 }
+
+.icon {
+
+  display: block;
+  flex-shrink: 0;
+  fill: white;
+  width: 25px;
+
+  margin-top: 12px;  
+  margin-bottom: 12px;  
+}

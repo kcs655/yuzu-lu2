@@ -6,7 +6,7 @@ import ChatList from "./ChatList";
 import useStore from "../../../../store"; // Zustandのストアをインポート
 
 export default function ChatView() {
-  const { user: currentUser, setUser } = useStore(); // Zustandのストアからユーザー情報を取得
+  const {  setUser } = useStore(); // Zustandのストアからユーザー情報を取得
   const [requests, setRequests] = useState<any[]>([]);
   const [currentRequestID, setCurrentRequestID] = useState<string | null>(null);
 

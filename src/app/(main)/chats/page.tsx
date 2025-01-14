@@ -7,7 +7,6 @@ import ChatView from "@/app/components/chats/ChatView";
 import useStore from "../../../../store"; // Zustandのストアをインポート
 
 export default function ChatsPage({
-  searchParams,
 }: {
   searchParams: { companyid: string };
 }) {

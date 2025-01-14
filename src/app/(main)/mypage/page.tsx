@@ -4,10 +4,8 @@ import { supabase } from "../../../../lib/supabase";
 import BookItem from "@/app/components/mypage/mytextbook";
 import useStore from "../../../../store";
 import { BookType } from "../../../../types";
-import { useRouter } from "next/navigation"; // useRouterをnext/navigationからimport
 
 const MainPage = () => {
-  const router = useRouter();
   const { user, setUser } = useStore();
   const [books, setBooks] = useState<BookType[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);

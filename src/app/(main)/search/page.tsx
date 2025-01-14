@@ -4,10 +4,8 @@ import { supabase } from "../../../../lib/supabase";
 import SearchItem from "@/app/components/search/search";
 import useStore from "../../../../store";
 import { BookType } from "../../../../types";
-import { useRouter } from "next/navigation";
 
 const SearchPage = () => {
-  const router = useRouter();
   const { user, setUser } = useStore();
   const [books, setBooks] = useState<BookType[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);

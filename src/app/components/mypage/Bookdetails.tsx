@@ -4,7 +4,6 @@ import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
 import { BookType, RequestType } from "../../../../types";
-import Image from "next/image";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { ArticleJsonLd, NextSeo } from "next-seo";
@@ -18,8 +17,6 @@ interface BookDetailProps {
 
 const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
   const router = useRouter();
-  const [error, setError] = useState<string>("");
-  const [isPending, startTransition] = useTransition();
   const [requests, setRequests] = useState<RequestType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -67,53 +64,47 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
       return;
     }
 
-    setError("");
     setIsLoading(true);
 
-    startTransition(async () => {
-      try {
-        // 教科書削除
-        const { error } = await supabase
-          .from("textbook")
-          .delete()
-          .eq("id", book.id);
+    try {
+      // 教科書削除
+      const { error } = await supabase
+        .from("textbook")
+        .delete()
+        .eq("id", book.id);
 
-        if (error) {
-          console.error(`Delete error: ${JSON.stringify(error)}`);
-          setError(error.message);
+      if (error) {
+        console.error(`Delete error: ${JSON.stringify(error)}`);
+        setIsLoading(false);
+        return;
+      }
+
+      // 画像がある場合、画像を削除
+      if (book.image_url) {
+        const fileName = book.image_url.split("/").slice(-1)[0];
+        const { error: storageError } = await supabase.storage
+          .from("textbook")
+          .remove([`${book.user_id}/${fileName}`]);
+
+        if (storageError) {
+          console.error(
+            `Storage delete error: ${JSON.stringify(storageError)}`
+          );
           setIsLoading(false);
           return;
         }
-
-        // 画像がある場合、画像を削除
-        if (book.image_url) {
-          const fileName = book.image_url.split("/").slice(-1)[0];
-          const { error: storageError } = await supabase.storage
-            .from("textbook")
-            .remove([`${book.user_id}/${fileName}`]);
-
-          if (storageError) {
-            console.error(
-              `Storage delete error: ${JSON.stringify(storageError)}`
-            );
-            setError(storageError.message);
-            setIsLoading(false);
-            return;
-          }
-        }
-
-        toast.success("教科書を削除しました");
-        setIsLoading(false);
-
-        // ページをリフレッシュしてmypageに移動
-        router.push("/mypage");
-        router.refresh();
-      } catch (err) {
-        console.error(err);
-        setError("エラーが発生しました");
-        setIsLoading(false);
       }
-    });
+
+      toast.success("教科書を削除しました");
+      setIsLoading(false);
+
+      // ページをリフレッシュしてmypageに移動
+      router.push("/mypage");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+    }
   };
 
   const formatDate = (dateString: string): string => {
@@ -127,7 +118,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
 
   const formatDescription = (description: string): string => {
     if (!description) return "未設定";
-    let sanitizedDescription = description.replace(/\n/g, "<br/>");
+    const sanitizedDescription = description.replace(/\n/g, "<br/>");
     return sanitizedDescription;
   };
 

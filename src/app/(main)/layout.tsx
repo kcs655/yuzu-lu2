@@ -1,9 +1,14 @@
 "use client";
 import { FC, memo, ReactNode, useState } from "react";
 import Link from "next/link";
+
 import styles from "./Layout.module.css";
 import { usePathname, useRouter } from "next/navigation";
-import { supabase } from "../../../lib/supabase"; // supabaseインスタンスへのパスはプロジェクトに合わせて変更してください。
+import { supabase } from "../../../lib/supabase";
+import * as JSX from 'react';
+
+import { favoriteImage, chatImage, UploadedImage } from "../../../styles/icon";
+
 
 type Props = {
   children: ReactNode;
@@ -12,32 +17,39 @@ type Props = {
 type Navigation = {
   pageName: string;
   path: string;
+  icon: ReactNode; // iconの型をStaticImageDataに変更
 };
 
 const navigations: Navigation[] = [
   {
     pageName: "マイページ",
     path: "/mypage",
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
   },
   {
     pageName: "教科書検索",
     path: "/search",
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
   },
   {
     pageName: "教科書登録",
     path: "/register-textbook",
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
   },
   {
     pageName: "欲しい教科書",
     path: "/wish-list",
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
   },
   {
     pageName: "チャット",
     path: "/chats",
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
   },
   {
     pageName: "設定",
     path: "/settings",
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
   },
 ];
 
@@ -95,6 +107,7 @@ export const Layout: FC<Props> = memo((props) => {
                 background: isPageActive(navigation.path) ? "#1B555A" : "none",
               }}
             >
+
               {menuOpen && (
                 <p className={styles.pageName}>{navigation.pageName}</p>
               )}
