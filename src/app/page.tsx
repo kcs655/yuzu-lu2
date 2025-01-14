@@ -8,20 +8,21 @@ export default function Home() {
   return (
     <div style={styles.container}>
       
-
+      <div style={styles.logoWrapper}>
       {/* アイコン画像 */}
       <img
-        src="images/icon-02.png" // アップロードされたアイコンのURLに置き換えてください
+        src="images/logo.png" // アップロードされたアイコンのURLに置き換えてください
         alt="Yuzu=Lu アイコン"
         style={{
-          width: "400px",
-          height: "400px",
+          maxWidth: "75vh",      // 画面幅の80%まで拡大
+          maxHeight: "80vh",     // 画面高の80%まで拡大
+          height: "auto",        // アスペクト比を保つ
           marginBottom: "20px",
           borderRadius: "10px",
-          objectFit: "cover", // 型エラーを防ぐためにここで明示
+          objectFit: "cover",    // 画像が枠に収まるよう必要に応じて変更
         }}
       />
-
+</div>
       {/* ボタン */}
       <div style={styles.buttonContainer}>
         <button
@@ -51,8 +52,23 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f0f8ff",
+    // ★ 背景画像を指定する
+    backgroundImage: 'url("/images/haikei01.png")', // ここを実際の背景画像パスに
+    backgroundSize: "cover",      // 画像を画面全体に埋める
+    backgroundPosition: "center", // 中央寄せ
+    backgroundRepeat: "no-repeat",// 繰り返しなし
+    // ★ 背景の明るさを上げる
+    filter: "brightness(1.0)", 
   },
+  logoWrapper: {
+    backgroundColor: "rgba(255, 255, 255, 0.60)", 
+    padding: "20px",
+    borderRadius: "10px",
+    /* 影で強調したい場合 */
+    boxShadow: "0 4px 8px rgba(31, 28, 28, 0.2)",
+  },
+ 
   buttonContainer: {
     display: "flex",
     flexDirection: "column",
