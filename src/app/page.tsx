@@ -1,5 +1,6 @@
 "use client";
 
+
 export default function Home() {
   const handleTermsClick = () => {
     alert("利用規約を確認してください。");
@@ -37,7 +38,7 @@ export default function Home() {
         >
           新規登録
         </button>
-        <button style={styles.button} onClick={handleTermsClick}>
+        <button style={styles.button} onClick={() => window.location.href = '/terms-of-service.html'}>
           利用規約
         </button>
       </div>
