@@ -1,13 +1,10 @@
 "use client";
-import { FC, memo, ReactNode, useState } from "react";
+import { FC, ReactNode, useState } from "react";
 import Link from "next/link";
-
-import styles from "./Layout.module.css";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
-
 import { UploadedImage } from "../../../styles/icon";
-
+import styles from "./Layout.module.css";
 
 type Props = {
   children: ReactNode;
@@ -16,45 +13,43 @@ type Props = {
 type Navigation = {
   pageName: string;
   path: string;
-  icon: ReactNode; // iconの型をStaticImageDataに変更
+  icon: ReactNode;
 };
 
 const navigations: Navigation[] = [
   {
     pageName: "マイページ",
     path: "/mypage",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
   },
   {
     pageName: "教科書検索",
     path: "/search",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
   },
   {
     pageName: "教科書登録",
     path: "/register-textbook",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
   },
   {
     pageName: "欲しい教科書",
     path: "/wish-list",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
   },
   {
     pageName: "チャット",
     path: "/chats",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
   },
   {
     pageName: "設定",
     path: "/settings",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />, // 画像を指定
+    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
   },
 ];
 
-/* eslint-disable-next-line react/display-name */
-export const Layout: FC<Props> = memo((props) => {
-  const { children } = props;
+const Layout: FC<Props> = ({ children }) => {
   const [menuOpen, setMenuOpen] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -65,7 +60,6 @@ export const Layout: FC<Props> = memo((props) => {
     return pagePath === pathname;
   };
 
-  // ここでLogoutのロジックを組み込み
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -106,7 +100,6 @@ export const Layout: FC<Props> = memo((props) => {
                 background: isPageActive(navigation.path) ? "#1B555A" : "none",
               }}
             >
-
               {menuOpen && (
                 <p className={styles.pageName}>{navigation.pageName}</p>
               )}
@@ -114,41 +107,38 @@ export const Layout: FC<Props> = memo((props) => {
           </Link>
         ))}
 
-        {/* ログアウトボタン */}
         <div
           className={styles.flexContainer}
           style={{ cursor: "pointer", marginTop: "auto", padding: "1rem" }}
           onClick={() => setShowLogoutConfirm(true)}
         >
-           {menuOpen && (
-    <p 
-    className={styles.pageName} 
-    style={{
-      display: "flex",         // Flexboxにする
-      alignItems: "center",    // 垂直方向に中央揃え
-      margin: 0                // デフォルトマージン削除（必要なら）
-    }}
-  >
-      {/* exitマークアイコン */}
-      <img
-        src="/images/logout.png"      // 実際のパスに合わせて変更
-        alt="Exit Icon"
-        style={{
-          width: "24px",
-          height: "24px",
-          marginRight: "8px",       // テキストとの隙間
-        }}
-      />
-      ログアウト
-    </p>
-  )}
+          {menuOpen && (
+            <p
+              className={styles.pageName}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                margin: 0,
+              }}
+            >
+              <img
+                src="/images/logout.png"
+                alt="Exit Icon"
+                style={{
+                  width: "24px",
+                  height: "24px",
+                  marginRight: "8px",
+                }}
+              />
+              ログアウト
+            </p>
+          )}
         </div>
       </aside>
 
       <main className={styles.mainContent}>
         {children}
 
-        {/* ログアウト確認ダイアログ */}
         {showLogoutConfirm && (
           <div
             style={{
@@ -216,6 +206,6 @@ export const Layout: FC<Props> = memo((props) => {
       </main>
     </div>
   );
-});
+};
 
 export default Layout;

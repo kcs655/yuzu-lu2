@@ -10,6 +10,7 @@ import useStore from "../../../../store";
 
 interface WishDetailProps {
   book: BookType;
+  isMyBook: boolean;
 }
 
 const WishDetail = ({ book }: WishDetailProps) => {

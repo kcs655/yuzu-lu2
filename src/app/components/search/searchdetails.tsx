@@ -10,6 +10,7 @@ import useStore from "../../../../store";
 
 interface BookDetailProps {
   book: BookType;
+  isMyBook?: boolean;
 }
 
 const SearchDetail = ({ book}: BookDetailProps) => {
