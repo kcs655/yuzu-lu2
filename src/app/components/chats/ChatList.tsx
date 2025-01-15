@@ -29,7 +29,7 @@ export default function ChatList({ request_id }: Props) {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "apply_message",
           filter: `request_id=eq.${request_id}`,
