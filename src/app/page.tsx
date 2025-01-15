@@ -15,8 +15,8 @@ export default function Home() {
         src="images/logo.png" // アップロードされたアイコンのURLに置き換えてください
         alt="Yuzu=Lu アイコン"
         style={{
-          maxWidth: "75vh",      // 画面幅の80%まで拡大
-          maxHeight: "80vh",     // 画面高の80%まで拡大
+          maxWidth: "400px",      // 画面幅の80%まで拡大
+          maxHeight: "400px",     // 画面高の80%まで拡大
           height: "auto",        // アスペクト比を保つ
           marginBottom: "20px",
           borderRadius: "10px",
