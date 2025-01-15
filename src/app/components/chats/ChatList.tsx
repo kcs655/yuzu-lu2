@@ -23,6 +23,34 @@ export default function ChatList({ request_id }: Props) {
   useEffect(() => {
     if (request_id == null || user == null) return;
     getChatData();
+
+    const channel = supabase
+      .channel("chat-channel")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "apply_message",
+          filter: `request_id=eq.${request_id}`,
+        },
+        (payload) => {
+          const newMessage = payload.new as ChatMessage; // payload.new を ChatMessage 型にキャスト
+          setChatData((prevData) => {
+            // 同じIDのメッセージがすでに存在する場合は無視する
+            if (prevData.find((message) => message.id === newMessage.id)) {
+              return prevData;
+            }
+            return [...prevData, newMessage];
+          });
+        }
+      )
+      .subscribe();
+
+    // コンポーネントがアンマウントされたときにリスナーをクリーンアップ
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [request_id]);
 
   const getChatData = async () => {

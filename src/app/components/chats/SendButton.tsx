@@ -50,7 +50,6 @@ export default function SendButton({ request_id, setChatData }: Props) {
     }
 
     setMessage("");
-    setChatData((prev) => [...prev, data[0]]); // 新しいメッセージをチャットデータに追加
   };
 
   return (
