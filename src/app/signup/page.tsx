@@ -37,17 +37,15 @@ const SignUp = () => {
       }}>
         {/* 左上にホームへ戻るリンク */}
         <div style={{ position: 'absolute', left: '1rem' }}>
-          <Link 
-            href="/" 
-            style={{ 
-              color: '#0070f3', 
-               
-              cursor: 'pointer' 
-            }}
-          >
-         ＜
-          </Link>
-        </div>
+      <Link href="/" style={{ cursor: 'pointer' }}>
+        <Image
+          src="/modoru.png"  //modoru.png を参照
+          alt="戻る"
+          width={40}             // お好みでサイズ調整してください
+          height={40}
+        />
+      </Link>
+    </div>
         <h1 style={{ margin: 0 }}>
                 <Image
                   src="/images/logo.png"  // ここは実際の画像パスに変えてください
