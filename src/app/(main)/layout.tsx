@@ -122,7 +122,7 @@ const Layout: FC<Props> = ({ children }) => {
               }}
             >
               <img
-                src="/images/logout.png"
+                src="/images/exit.png"
                 alt="Exit Icon"
                 style={{
                   width: "24px",
