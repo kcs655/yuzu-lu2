@@ -50,7 +50,13 @@ export default function SendButton({ request_id, setChatData }: Props) {
     }
 
     setMessage("");
-    setChatData((prev) => [...prev, data[0]]); // 新しいメッセージをチャットデータに追加
+    setChatData((prev) => {
+      // 同じIDのメッセージがすでに存在する場合は無視する
+      if (prev.find((msg) => msg.id === data[0].id)) {
+        return prev;
+      }
+      return [...prev, data[0]];
+    });
   };
 
   return (
