@@ -100,6 +100,27 @@ const SignUp = () => {
         </div>
       </main>
 
+       {/* フッターの直前に利用規約のリンクを追加 */}
+       <div style={{ textAlign: "center", padding: "1rem" }}>
+        <p>
+          サインアップすることで、{" "}
+          <Link
+            href="/terms-of-service.html"
+            style={{
+              color: "#0070f3",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+            // 新しいタブで開きたい場合は下記のような設定も可能
+            // target="_blank"
+            // rel="noopener noreferrer"
+          >
+            利用規約
+          </Link>
+          に同意することとします。
+        </p>
+      </div>
+
       {/* フッター */}
       <footer style={{ padding: '1rem', background: '#f5f5f5', textAlign: 'center' }}>
         <p>
@@ -112,6 +133,7 @@ const SignUp = () => {
           </Link>
         </p>
       </footer>
+      
     </div>
   );
 };
