@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation"; // ★ 追加
 import { BookType } from "../../../../types";
 import { supabase } from "../../../../lib/supabase";
 import parse from "html-react-parser";
@@ -15,6 +16,8 @@ interface WishDetailProps {
 
 const WishDetail = ({ book }: WishDetailProps) => {
   const { user, setUser } = useStore();
+  const router = useRouter(); // ★ useRouter を呼び出す
+
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isRequestDisabled, setIsRequestDisabled] = useState(false);
@@ -59,7 +62,7 @@ const WishDetail = ({ book }: WishDetailProps) => {
   }, [user?.id, book.id]);
 
   const handleRequest = async () => {
-    if (user.id) {
+    if (user?.id) {
       const { error: requestError } = await supabase.from("request").insert({
         id: uuidv4(),
         requester_id: user.id,
@@ -72,10 +75,43 @@ const WishDetail = ({ book }: WishDetailProps) => {
       } else {
         setMessage("リクエストが送信されました。");
         setError("");
-        setIsRequestDisabled(true); // ボタンを無効化
+        setIsRequestDisabled(true);
       }
     } else {
       setError("ユーザー情報が取得できませんでした。");
+      setMessage("");
+    }
+  };
+
+  // ★ wantbook テーブルからデータを削除後、 wish-list ページへリダイレクト
+  const handleDeleteWantbook = async () => {
+    if (!user?.id) {
+      setError("ユーザー情報が取得できませんでした。");
+      setMessage("");
+      return;
+    }
+
+    try {
+      const { error: deleteError } = await supabase
+        .from("wantbook")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("textbook_id", book.id);
+
+      if (deleteError) {
+        setError(deleteError.message);
+        setMessage("");
+      } else {
+        setMessage("wantbook から削除しました。");
+        setError("");
+
+        // ★ 削除成功後に /wish-list に遷移してページを再読み込み
+        router.push("/wish-list"); 
+        router.refresh();
+      }
+    } catch (err: any) {
+      console.error("Error deleting from wantbook:", err);
+      setError("wantbook レコードの削除時にエラーが発生しました。");
       setMessage("");
     }
   };
@@ -91,8 +127,7 @@ const WishDetail = ({ book }: WishDetailProps) => {
 
   const formatDescription = (description: string): string => {
     if (!description) return "未設定";
-    const sanitizedDescription = description.replace(/\n/g, "<br/>");
-    return sanitizedDescription;
+    return description.replace(/\n/g, "<br/>");
   };
 
   const ogImage = useMemo(() => {
@@ -122,6 +157,7 @@ const WishDetail = ({ book }: WishDetailProps) => {
         authorName="Author Name" // 適切な著者名に修正
         description={book.details}
       />
+
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <img
           src={ogImage}
@@ -129,21 +165,21 @@ const WishDetail = ({ book }: WishDetailProps) => {
           style={{ maxWidth: "100%", height: "auto" }}
         />
       </div>
-      <h1
-        style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}
-      >
+
+      <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}>
         {book.title}
       </h1>
       <p style={{ marginBottom: "10px" }}>{formatDate(book.updated_at)}</p>
       {book.author && <p style={{ marginBottom: "20px" }}>{book.author}</p>}
+
       <div style={{ marginBottom: "20px" }}>
-        <h2
-          style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}
-        >
+        <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>
           詳細
         </h2>
         <p>{parse(formatDescription(book.details))}</p>
       </div>
+
+      {/* リクエストボタン */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <button
           onClick={handleRequest}
@@ -156,13 +192,22 @@ const WishDetail = ({ book }: WishDetailProps) => {
         >
           リクエスト
         </button>
-        {error && (
-          <div style={{ color: "red", textAlign: "center" }}>{error}</div>
-        )}
-        {message && (
-          <div style={{ color: "green", textAlign: "center" }}>{message}</div>
-        )}
       </div>
+
+      {/* wantbook のレコード削除ボタン */}
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        <button
+          onClick={handleDeleteWantbook}
+          className="w-full text-white bg-red-500 hover:brightness-110 rounded py-1 px-8"
+        >
+          欲しい教科書から削除
+        </button>
+      </div>
+
+      {error && <div style={{ color: "red", textAlign: "center" }}>{error}</div>}
+      {message && (
+        <div style={{ color: "green", textAlign: "center" }}>{message}</div>
+      )}
     </div>
   );
 };
