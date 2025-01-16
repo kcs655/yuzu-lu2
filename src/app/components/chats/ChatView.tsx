@@ -6,7 +6,7 @@ import ChatList from "./ChatList";
 import useStore from "../../../../store"; // Zustandのストアをインポート
 
 export default function ChatView() {
-  const {  setUser } = useStore(); // Zustandのストアからユーザー情報を取得
+  const { setUser } = useStore(); // Zustandのストアからユーザー情報を取得
   const [requests, setRequests] = useState<any[]>([]);
   const [currentRequestID, setCurrentRequestID] = useState<string | null>(null);
 
@@ -23,7 +23,7 @@ export default function ChatView() {
       // 現在ログインしているユーザーが登録した本のIDを取得
       const { data: textbooks, error: textbookError } = await supabase
         .from("textbook")
-        .select("id")
+        .select("id, title") // 教科書のタイトルも取得
         .eq("user_id", user.id);
       if (textbookError || !textbooks) {
         console.error("Error fetching textbooks:", textbookError?.message);
@@ -76,7 +76,7 @@ export default function ChatView() {
             // `textbook_id` の外部キーである `textbook` テーブルの `user_id` を取得
             const { data: textbookData, error: textbookError } = await supabase
               .from("textbook")
-              .select("user_id")
+              .select("user_id, title") // 教科書のタイトルも取得
               .eq("id", request.textbook_id)
               .single();
             if (textbookError) {
@@ -91,27 +91,47 @@ export default function ChatView() {
             const { data: profileData, error: profileError } = await supabase
               .from("profiles")
               .select("email")
-              .eq("id", textbookData.user_id)
+              .eq("id", textbookData.user_id);
+
+            if (profileError || profileData.length === 0) {
+              console.error("Error fetching profile data:", profileError ? profileError.message : "No profile found");
+              return null;
+            }
+
+            if (profileData.length > 1) {
+              console.error("Error: Multiple profiles found for the same ID");
+              return null;
+            }
+
+            const profile = profileData[0]; // 期待通りに単一のプロファイルを取得
+
+            return {
+              id: request.id,
+              requester: profile.email,
+              textbookName: textbookData.title // 教科書のタイトルを追加
+            };
+          } else {
+            // `textbook_id` に基づいて教科書のタイトルを取得
+            const { data: textbookData, error: textbookError } = await supabase
+              .from("textbook")
+              .select("title") // 教科書のタイトルを取得
+              .eq("id", request.textbook_id)
               .single();
-            if (profileError) {
+            if (textbookError || !textbookData) {
               console.error(
-                "Error fetching profile data:",
-                profileError.message
+                "Error fetching textbook data:",
+                textbookError ? textbookError.message : "No textbook found"
               );
               return null;
             }
 
-            return {
-              id: request.id,
-              requester: profileData.email,
-            };
-          } else {
             const requesterData = await getRequesterData(request.requester_id);
             if (requesterData.length === 0) return null;
 
             return {
               id: request.id,
               requester: requesterData[0].email,
+              textbookName: textbookData.title // 教科書の名前を追加
             };
           }
         })
@@ -155,7 +175,7 @@ export default function ChatView() {
               onClick={() => handleRequestClick(item.id)}
               className="text-left p-4 bg-white w-full hover:bg-gray-200"
             >
-              {item.requester}
+              {item.requester} - {item.textbookName}
             </button>
           </li>
         ))}
