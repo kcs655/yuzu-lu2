@@ -12,7 +12,7 @@ export default function Home() {
       <div style={styles.logoWrapper}>
       {/* アイコン画像 */}
       <img
-        src="images/logo.png" // アップロードされたアイコンのURLに置き換えてください
+        src="images/logo01.png" // アップロードされたアイコンのURLに置き換えてください
         alt="Yuzu=Lu アイコン"
         style={{
           maxWidth: "400px",      // 画面幅の80%まで拡大
@@ -64,10 +64,10 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   logoWrapper: {
     backgroundColor: "rgba(255, 255, 255, 0.70)", 
-    padding: "20px",
+    padding: "25px",
     borderRadius: "10px",
     /* 影で強調したい場合 */
-    boxShadow: "0 4px 8px rgba(31, 28, 28, 0.2)",
+    /*boxShadow: "0 4px 8px rgba(31, 28, 28, 0.2)",*/
   },
  
   buttonContainer: {
