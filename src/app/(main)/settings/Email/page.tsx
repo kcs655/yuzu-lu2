@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../../lib/supabase";
 import { useRouter } from "next/navigation";
-import Email from "@/app/components/settings/Email";
+import EmailForm from "@/app/components/settings/Email"; // Emailコンポーネントの名前をEmailFormに変更
 
 interface User {
   id: string;
@@ -17,25 +17,29 @@ const EmailPage = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: userData, error } = await supabase.auth.getUser();
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
 
-      if (error) {
-        console.error("Error fetching user data:", error);
+      if (sessionError) {
+        console.error("Error fetching session:", sessionError);
         router.push("/mypage");
         return;
       }
 
-      if (!userData?.user || !userData.user.email) {
+      if (!sessionData.session?.user || !sessionData.session.user.email) {
         console.error("No user or email found");
         router.push("/mypage");
         return;
       }
 
       setUser({
-        id: userData.user.id,
-        email: userData.user.email,
+        id: sessionData.session.user.id,
+        email: sessionData.session.user.email,
       });
       setLoading(false);
+
+      // セッションの有効期限を確認
+      console.log("Session expires at:", sessionData.session?.expires_at);
     };
 
     fetchUser();
@@ -49,7 +53,7 @@ const EmailPage = () => {
     return <div>Error loading user data</div>;
   }
 
-  return <Email email={user.email} />;
+  return <EmailForm email={user.email} />; // EmailコンポーネントをEmailFormに変更
 };
 
 export default EmailPage;
