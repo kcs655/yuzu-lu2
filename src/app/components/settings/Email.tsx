@@ -1,38 +1,23 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
-import { z } from "zod";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { EmailSchema } from "../../../../schemas";
-import { updateEmail } from "../../../../actions/user";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { supabase } from "../../../../lib/supabase";
+import { z } from "zod";
+import { updateEmail } from "../../../../actions/user";
 
-interface EmailProps {
+interface EmailFormProps {
   email: string;
 }
 
-const Email = ({ email }: EmailProps) => {
+const EmailForm = ({ email }: EmailFormProps) => {
+  // Emailコンポーネントの名前をEmailFormに変更
   const router = useRouter();
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: sessionData, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Error fetching session:", error);
-      } else {
-        setAccessToken(sessionData?.session?.access_token || null);
-        setRefreshToken(sessionData?.session?.refresh_token || null);
-      }
-    };
-    getSession();
-  }, []);
 
   const form = useForm<z.infer<typeof EmailSchema>>({
     resolver: zodResolver(EmailSchema),
@@ -41,39 +26,28 @@ const Email = ({ email }: EmailProps) => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof EmailSchema>) => {
+  const onSubmit = async (values: z.infer<typeof EmailSchema>) => {
     setError("");
-
-    if (!accessToken || !refreshToken) {
-      setError("認証セッションが見つかりません。ログインしてください。");
-      return;
-    }
 
     startTransition(async () => {
       try {
-        const res = await updateEmail(
-          {
-            ...values,
-          },
-          accessToken,
-          refreshToken
-        );
+        const result = await updateEmail(values); // サーバーアクションを呼び出す
 
-        if (res?.error) {
-          setError(res.error);
-          return;
+        if (result?.error) {
+          setError(result.error);
+        } else {
+          toast.success(
+            result?.message || "メールアドレスの変更リクエストを送信しました。"
+          );
+          router.push("/settings");
+          router.refresh(); // ページをリフレッシュ
         }
-
-        toast.success("メールアドレスが更新されました");
-        router.push("/mypage");
-        router.refresh();
       } catch (error) {
         console.error(error);
         setError("エラーが発生しました");
       }
     });
   };
-
   return (
     <div style={{ maxWidth: "400px", margin: "0 auto", padding: "20px" }}>
       <h1
@@ -164,4 +138,4 @@ const Email = ({ email }: EmailProps) => {
   );
 };
 
-export default Email;
+export default EmailForm; // Emailコンポーネントの名前をEmailFormに変更
