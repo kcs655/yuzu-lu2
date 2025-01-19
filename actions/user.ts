@@ -1,30 +1,29 @@
-// actions/user.ts
-"use server";
-
 import { EmailSchema } from "../schemas";
+import { supabase } from "../lib/supabase";
 import { z } from "zod";
-import { revalidateTag } from "next/cache";
-import { supabaseServer } from "../lib/supabase-server"; // サーバー用クライアントをインポート
 
-export const updateEmail = async (values: z.infer<typeof EmailSchema>) => {
+export const updateEmail = async (
+  values: z.infer<typeof EmailSchema>,
+  accessToken?: string,
+  refreshToken?: string
+) => {
   try {
     console.log("Sending email verification for:", values.email);
-    const { error: updateUserError, data } =
-      await supabaseServer.auth.updateUser({
-        email: values.email,
-      });
+    const { error: updateUserError } = await supabase.auth.updateUser(
+      { email: values.email },
+      { emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/email/verify` }
+    );
 
     if (updateUserError) {
       console.error("Update user error:", updateUserError);
       return { error: updateUserError.message };
     }
 
-    console.log("Updated user data:", data);
-    await revalidateTag("settings"); // "settings" タグを持つページを再検証
-    return { message: "メールアドレスの変更リクエストを送信しました。" };
+    console.log("Verification email sent successfully");
+    return { message: "Verification email sent successfully" };
   } catch (error) {
     if (error instanceof Error) {
-      console.error("Error revalidating tag:", error);
+      console.error("Catch error:", error.message);
       return { error: error.message };
     }
     console.error("Unknown error");
