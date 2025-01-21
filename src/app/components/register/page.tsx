@@ -13,6 +13,7 @@ const TextbookNew = () => {
   const authorRef = useRef<HTMLInputElement>(null!);
   const subjectRef = useRef<HTMLInputElement>(null!);
   const gradeRef = useRef<HTMLInputElement>(null!);
+  const isbnRef = useRef<HTMLInputElement>(null!); // Add this line
   const detailsRef = useRef<HTMLTextAreaElement>(null!);
   const [image, setImage] = useState<File | null>(null);
 
@@ -74,6 +75,7 @@ const TextbookNew = () => {
         author: authorRef.current.value,
         subject: subjectRef.current.value,
         grade: parseInt(gradeRef.current.value, 10),
+        isbn: isbnRef.current.value, // Add this line
         details: detailsRef.current.value,
         image_url: imageUrl,
         user_id: user.id,
@@ -136,6 +138,17 @@ const TextbookNew = () => {
             type="number"
             id="grade"
             placeholder="Grade"
+          />
+        </div>
+
+        <div className="mb-5">
+          <div className="text-sm mb-1">ISBN</div> {/* Add this block */}
+          <input
+            className="w-full bg-gray-100 rounded border py-1 px-3 outline-none focus:bg-transparent focus:ring-2 focus:ring-yellow-500"
+            ref={isbnRef}
+            type="text"
+            id="isbn"
+            placeholder="ISBN"
           />
         </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
 import { BookType, RequestType } from "../../../../types";
@@ -170,17 +170,13 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
         <p>{parse(formatDescription(book.details))}</p>
       </div>
       <div style={{ marginBottom: "20px" }}>
-        <h2
-          style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}
-        >
-          Subject & Grade
-        </h2>
-        <p>Subject: {book.subject ? book.subject : "未設定"}</p>
-        <p>Grade: {book.grade ? book.grade : "未設定"}</p>
+        <p>科目: {book.subject ? book.subject : "未設定"}</p>
+        <p>学年: {book.grade ? book.grade : "未設定"}</p>
+        <p>ISBN: {book.isbn ? book.isbn : "未設定"}</p>
       </div>
       {isMyBook && (
         <div className="flex items-center justify-end space-x-3">
-          <Link href={`/mypage/${book.id}/edit`}>
+          <Link href={`/mypage/${book.id}/edit?id=${book.id}`}>
             <FilePenLine className="w-6 h-6" />
           </Link>
           <button

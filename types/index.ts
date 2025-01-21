@@ -9,6 +9,7 @@ export interface BookType {
   image_url: string | null;
   updated_at: string;
   created_at: string;
+  isbn: string;
 }
 
 export interface WishType {
