@@ -1,174 +1,274 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { TextbookSchema } from "../../../../schemas";
-import { editTextbook } from "../../../../actions/blog";
-import { useRouter } from "next/navigation";
-import ImageUploading, { ImageListType } from "react-images-uploading";
-import toast from "react-hot-toast";
-import Image from "next/image";
+import { useState, useEffect, FormEvent } from "react";
+import { supabase } from "../../../../lib/supabase"; // ★ 直接インポート
+import { useRouter, useSearchParams } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";
 
-interface TextbookType {
+// ユーザーIDを取得する方法をどこかで用意してください
+// 例: useStore() or supabase.auth.getUser() など
+
+// ★ ここで「ファイル名正規化関数」を定義 ★
+function normalizeFilename(originalName: string): string {
+  // 例: 半角英数字, '.', '-', '_' 以外を '_' に置き換える
+  return originalName.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+}
+
+type Textbook = {
   id: string;
   user_id: string;
   title: string;
-  author?: string;
-  subject?: string;
-  grade?: number;
-  details?: string;
-  image_url?: string;
-  updated_at: string;
-  created_at: string;
-}
+  author: string;
+  subject: string | null;
+  grade: number | null;
+  details: string | null;
+  isbn: string | null;
+  image_url: string | null;
+};
 
-
-
-const TextbookEdit = ({ textbook }: { textbook: TextbookType }) => {
+export default function EditTextbookForm() {
   const router = useRouter();
-  const [error, setError] = useState("");
-  const [isPending, startTransition] = useTransition();
-  const [imageUpload, setImageUpload] = useState<ImageListType>([
-    {
-      dataURL: textbook.image_url || "/images/noimage.png",
-    },
-  ]);
+  const searchParams = useSearchParams();
+  const textbookId = searchParams.get("id");
 
-  const form = useForm<z.infer<typeof TextbookSchema>>({
-    resolver: zodResolver(TextbookSchema),
-    defaultValues: {
-      title: textbook.title,
-      author: textbook.author,
-      subject: textbook.subject,
-      grade: textbook.grade,
-      details: textbook.details,
-    },
-  });
+  // [!] ユーザーIDを使うためのステートを定義 (例)
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // 送信
-  const onSubmit = (values: z.infer<typeof TextbookSchema>) => {
-    setError("");
+  const [textbook, setTextbook] = useState<Textbook | null>(null);
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [subject, setSubject] = useState("");
+  const [grade, setGrade] = useState<number | null>(null);
+  const [details, setDetails] = useState("");
+  const [isbn, setIsbn] = useState("");
+  const [existingImageUrl, setExistingImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-    let newImageUrl = textbook.image_url;
-    if (imageUpload.length > 0) {
-      console.log("選択された画像:", imageUpload[0]);
-      newImageUrl = imageUpload[0].dataURL;
+  // ----------------------
+  // 1) ユーザー情報の取得 (例)
+  // ----------------------
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    })();
+  }, []);
+
+  // ----------------------
+  // 2) データ取得の useEffect
+  // ----------------------
+  useEffect(() => {
+    if (!textbookId) return;
+
+    const fetchData = async () => {
+      const { data, error } = await supabase
+        .from("textbook")
+        .select("*")
+        .eq("id", textbookId)
+        .single();
+
+      if (error) {
+        console.error("Fetch error:", error);
+        return;
+      }
+
+      if (data) {
+        setTextbook(data);
+        setTitle(data.title ?? "");
+        setAuthor(data.author ?? "");
+        setSubject(data.subject ?? "");
+        setGrade(data.grade ?? null);
+        setDetails(data.details ?? "");
+        setIsbn(data.isbn ?? "");
+        setExistingImageUrl(data.image_url ?? "");
+      }
+    };
+
+    fetchData();
+  }, [textbookId]);
+
+  // ------------------------------
+  // 画像を選択したときのハンドラ
+  // ------------------------------
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setImageFile(e.target.files[0]);
+  };
+
+  // -----------------------------
+  // 3) フォーム送信(更新)のハンドラ
+  // -----------------------------
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!textbook) {
+      alert("編集対象がありません。");
+      return;
+    }
+    if (!userId) {
+      alert("ユーザーが未ログインです。");
+      return;
     }
 
-    startTransition(async () => {
-      try {
-        const res = await editTextbook({
-          ...values,
-          id: textbook.id,
-          imageUrl: newImageUrl,
-          userId: textbook.user_id,
-        });
+    try {
+      let newImageUrl = existingImageUrl;
 
-        if (res?.error) {
-          setError(res.error);
+      // 画像差し替えがある場合
+      if (imageFile) {
+        // 古い画像削除 (必要に応じて)
+        if (existingImageUrl) {
+          const { path } = extractBucketAndPathFromPublicUrl(existingImageUrl);
+          if (path) {
+            await supabase.storage.from("textbook").remove([path]);
+          }
+        }
+
+        // ★ ここで「ファイル名正規化」
+        const originalName = imageFile.name;
+        const safeName = normalizeFilename(originalName);
+
+        // ★ ここで userId と uuidv4 を使ってアップロード
+        //    (例) "ユーザーID/UUID_正規化したファイル名"
+        const filePath = `${userId}/${uuidv4()}_${safeName}`;
+
+        // ---- ここがご要望の箇所 ----
+        const { data: storageData, error: storageError } =
+          await supabase.storage
+            .from("textbook")
+            .upload(filePath, imageFile);
+
+        if (storageError) {
+          console.error("Upload error:", storageError);
+          alert(`画像アップロードに失敗しました: ${storageError.message}`);
           return;
         }
 
-        toast.success("教科書を編集しました");
+        // 公開URLの取得
+        const { data: publicUrlData } = supabase.storage
+          .from("textbook")
+          .getPublicUrl(storageData.path);
 
-        router.push(`/mypage/${textbook.id}`);
-        router.refresh();
-      } catch (error) {
-        console.error(error);
-        setError("エラーが発生しました");
+        if (publicUrlData?.publicUrl) {
+          newImageUrl = publicUrlData.publicUrl;
+        }
       }
-    });
+
+      // 教科書情報を UPDATE
+      const { error: updateError } = await supabase
+        .from("textbook")
+        .update({
+          title,
+          author,
+          subject,
+          grade,
+          details,
+          isbn,
+          image_url: newImageUrl,
+        })
+        .eq("id", textbook.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      alert("更新が完了しました");
+      router.push("/mypage");
+      router.refresh();
+    } catch (err: any) {
+      console.error("Error updating textbook:", err);
+      alert("更新時にエラーが発生しました: " + err.message);
+    }
   };
 
-  // 画像アップロード
-  const onChangeImage = (imageList: ImageListType) => {
-    setImageUpload(imageList);
+  // ---------------------------------------
+  // 既存URLからストレージパスを取り出す関数
+  // ---------------------------------------
+  const extractBucketAndPathFromPublicUrl = (url: string) => {
+    const bucket = "textbook";
+    const idx = url.indexOf(bucket + "/");
+    if (idx === -1) return { bucket: "", path: "" };
+    const path = url.substring(idx + bucket.length + 1); // "textbook/" の後ろを取得
+    return { bucket, path };
   };
 
+  // ----------------
+  // 画面レンダリング
+  // ----------------
   return (
-    <div className="mx-auto max-w-screen-md">
-      <div className="font-bold text-xl text-center mb-10">教科書編集</div>
-
-      <div className="mb-5">
-        <ImageUploading
-          value={imageUpload}
-          onChange={onChangeImage}
-          maxNumber={1}
-          acceptType={["jpg", "png", "jpeg"]}
-        >
-          {({ imageList, onImageUpload, onImageUpdate, dragProps }) => (
-            <div className="flex flex-col items-center justify-center">
-              {imageList.length == 0 && (
-                <button
-                  onClick={onImageUpload}
-                  className="aspect-video w-full border-2 border-dashed rounded hover:bg-gray-50"
-                  {...dragProps}
-                >
-                  <div className="text-gray-400 font-bold mb-2 text-sm">
-                    ファイル選択またはドラッグ＆ドロップ
-                  </div>
-                  <div className="text-gray-400 text-xs">
-                    ファイル形式：jpg / jpeg / png
-                  </div>
-                  <div className="text-gray-400 text-xs">
-                    ファイルサイズ：2MBまで
-                  </div>
-                </button>
-              )}
-
-              {imageList.map((image, index) => (
-                <div key={index}>
-                  {image.dataURL && (
-                    <div className="relative">
-                      <Image
-                        src={image.dataURL}
-                        alt="image"
-                        width={768}
-                        height={432}
-                        priority={true}
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {imageList.length > 0 && (
-                <div className="text-center mt-3">
-                  <button
-                    className="outline-button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onImageUpdate(0);
-                    }}
-                  >
-                    画像を変更
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </ImageUploading>
-      </div>
-
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        <div className="space-y-4 w-full">
-          {error && <div className="text-red-600">{error}</div>}
-
-          <button
-            type="submit"
-            className="w-full space-x-2 font-bold"
-            disabled={isPending}
-          >
-            {isPending && <Loader2 className="animate-spin" />}
-            <span>編集</span>
-          </button>
-        </div>
-      </form>
+    <div>
+      <h1>教科書の編集</h1>
+      {!textbook ? (
+        <p>データ読み込み中...</p>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label>タイトル:</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label>著者:</label>
+            <input
+              type="text"
+              value={author}
+              onChange={(e) => setAuthor(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>科目:</label>
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>学年:</label>
+            <input
+              type="number"
+              value={grade ?? ""}
+              onChange={(e) => setGrade(Number(e.target.value))}
+            />
+          </div>
+          <div>
+            <label>ISBN:</label>
+            <input
+              type="text"
+              value={isbn}
+              onChange={(e) => setIsbn(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>詳細:</label>
+            <textarea
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+            />
+          </div>
+          <div>
+            <label>現在の画像:</label>
+            {existingImageUrl ? (
+              <img
+                src={existingImageUrl}
+                alt="Current"
+                style={{ maxWidth: 200 }}
+              />
+            ) : (
+              <p>画像なし</p>
+            )}
+          </div>
+          <div>
+            <label>画像を変更する:</label>
+            <input type="file" accept="image/*" onChange={handleFileChange} />
+          </div>
+          <button type="submit">更新する</button>
+        </form>
+      )}
     </div>
   );
-};
-
-export default TextbookEdit;
+}
