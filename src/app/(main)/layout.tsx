@@ -42,11 +42,6 @@ const navigations: Navigation[] = [
     path: "/chats",
     icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
   },
-  {
-    pageName: "設定",
-    path: "/settings",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
-  },
 ];
 
 const Layout: FC<Props> = ({ children }) => {

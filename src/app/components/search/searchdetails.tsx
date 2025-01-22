@@ -13,7 +13,7 @@ interface BookDetailProps {
   isMyBook?: boolean;
 }
 
-const SearchDetail = ({ book}: BookDetailProps) => {
+const SearchDetail = ({ book }: BookDetailProps) => {
   const { user, setUser } = useStore();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -36,6 +36,7 @@ const SearchDetail = ({ book}: BookDetailProps) => {
     fetchUser();
   }, [setUser]);
 
+  // 「欲しい教科書リスト」に追加済みかどうかチェック
   useEffect(() => {
     const checkWishlist = async () => {
       if (user?.id) {
@@ -58,6 +59,7 @@ const SearchDetail = ({ book}: BookDetailProps) => {
     checkWishlist();
   }, [user?.id, book.id]);
 
+  // 「欲しい教科書リストに追加」ボタン押下
   const handleAddToWishlist = async () => {
     if (user.id) {
       const { error: insertError } = await supabase.from("wantbook").insert({
@@ -82,6 +84,7 @@ const SearchDetail = ({ book}: BookDetailProps) => {
   };
 
   const formatDate = (dateString: string): string => {
+    if (!dateString) return "不明";
     const options: Intl.DateTimeFormatOptions = {
       year: "numeric",
       month: "long",
@@ -96,55 +99,72 @@ const SearchDetail = ({ book}: BookDetailProps) => {
     return sanitizedDescription;
   };
 
+  // OGP用の画像
   const ogImage = useMemo(() => {
     return book.image_url || "/images/noimage.png";
   }, [book.image_url]);
 
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-      <NextSeo
-        title={book.title}
-        openGraph={{
-          images: [
-            {
-              url: ogImage,
-              width: 1200,
-              height: 630,
-            },
-          ],
-        }}
-      />
-      <ArticleJsonLd
-        type="BlogPosting"
-        url={`https://www.example.com/textbook/${book.id}`} // 適切なURLに修正
-        title={book.title}
-        images={ogImage ? [ogImage] : []}
-        datePublished={book.created_at}
-        authorName="Author Name" // 適切な著者名に修正
-        description={book.details}
-      />
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <img
-          src={ogImage}
-          alt={book.title}
-          style={{ maxWidth: "100%", height: "auto" }}
-        />
-      </div>
-      <h1
-        style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}
-      >
-        {book.title}
-      </h1>
-      <p style={{ marginBottom: "10px" }}>{formatDate(book.updated_at)}</p>
-      {book.author && <p style={{ marginBottom: "20px" }}>{book.author}</p>}
-      <div style={{ marginBottom: "20px" }}>
-        <h2
-          style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}
-        >
-          詳細
-        </h2>
-        <p>{parse(formatDescription(book.details))}</p>
-      </div>
+<div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
+  <NextSeo
+    title={book.title}
+    openGraph={{
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    }}
+  />
+  <ArticleJsonLd
+    type="BlogPosting"
+    url={`https://www.example.com/textbook/${book.id}`} // 実際のドメインに修正
+    title={book.title}
+    images={ogImage ? [ogImage] : []}
+    datePublished={book.created_at}
+    authorName="Author Name" // 実際の著者名に修正
+    description={book.details}
+  />
+
+  {/* メイン画像 */}
+  <div style={{ textAlign: "center", marginBottom: "20px" }}>
+    <img
+      src={ogImage}
+      alt={book.title}
+      style={{ maxWidth: "100%", height: "auto" }}
+    />
+  </div>
+
+  {/* タイトル */}
+  <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}>
+    {book.title}
+  </h1>
+
+  {/* 更新日時 */}
+  <p style={{ marginBottom: "10px" }}>{formatDate(book.updated_at)}</p>
+
+  {/* 著者 */}
+  {book.author && <p style={{ marginBottom: "20px" }}>{book.author}</p>}
+
+  {/* 詳細 */}
+  <div style={{ marginBottom: "20px" }}>
+    <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>
+      詳細
+    </h2>
+    <p>{parse(formatDescription(book.details))}</p>
+  </div>
+
+  {/* 科目 / 学年 / ISBN */}
+  <div style={{ marginBottom: "20px" }}>
+    <p>科目: {book.subject ? book.subject : "未設定"}</p>
+    <p>学年: {book.grade ? book.grade : "未設定"}</p>
+    <p>ISBN: {book.isbn ? book.isbn : "未設定"}</p>
+  </div>
+
+
+      {/* 「欲しい」ボタン */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <button
           onClick={handleAddToWishlist}
