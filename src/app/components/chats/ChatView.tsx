@@ -166,14 +166,19 @@ export default function ChatView() {
     setCurrentRequestID(id);
   };
 
-  return (
+  return ( 
     <div className="relative flex w-full max-w-4xl h-max min-h-screen pb-16">
       <ul className="w-64 max-w-64 bg-white">
         {requests.map((item) => (
-          <li className="border-b-gray-200 border-b" key={item.id}>
+          <li
+            key={item.id}
+            className={`border-b border-b-gray-200 ${
+              currentRequestID === item.id ? "bg-gray-200 font-bold" : "bg-white"
+            } transition-all duration-200`}
+          >
             <button
               onClick={() => handleRequestClick(item.id)}
-              className="text-left p-4 bg-white w-full hover:bg-gray-200"
+              className="text-left p-4 w-full hover:bg-gray-200"
             >
               {item.requester} - {item.textbookName}
             </button>
@@ -181,8 +186,18 @@ export default function ChatView() {
         ))}
       </ul>
       <div className="w-full bg-gray-200 border-l p-4">
-        <ChatList request_id={currentRequestID} />
+        {currentRequestID ? (
+          <>
+            <h2 className="text-xl font-bold mb-4">
+              {requests.find((req) => req.id === currentRequestID)?.textbookName}
+            </h2>
+            <ChatList request_id={currentRequestID} />
+          </>
+        ) : (
+          <p className="text-gray-500">チャットを選択してください</p>
+        )}
       </div>
     </div>
   );
+  
 }

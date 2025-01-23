@@ -150,14 +150,15 @@ const WishDetail = ({ book }: WishDetailProps) => {
       />
       <ArticleJsonLd
         type="BlogPosting"
-        url={`https://www.example.com/textbook/${book.id}`} // 適切なURLに修正
+        url={`https://www.example.com/textbook/${book.id}`} // 実際のドメインに修正
         title={book.title}
         images={ogImage ? [ogImage] : []}
         datePublished={book.created_at}
-        authorName="Author Name" // 適切な著者名に修正
+        authorName="Author Name" // 実際の著者名に修正
         description={book.details}
       />
-
+    
+      {/* メイン画像 */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <img
           src={ogImage}
@@ -165,18 +166,31 @@ const WishDetail = ({ book }: WishDetailProps) => {
           style={{ maxWidth: "100%", height: "auto" }}
         />
       </div>
-
+    
+      {/* タイトル */}
       <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}>
         {book.title}
       </h1>
+    
+      {/* 更新日時 */}
       <p style={{ marginBottom: "10px" }}>{formatDate(book.updated_at)}</p>
+    
+      {/* 著者 */}
       {book.author && <p style={{ marginBottom: "20px" }}>{book.author}</p>}
-
+    
+      {/* 詳細 */}
       <div style={{ marginBottom: "20px" }}>
         <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>
           詳細
         </h2>
         <p>{parse(formatDescription(book.details))}</p>
+      </div>
+    
+      {/* 科目 / 学年 / ISBN */}
+      <div style={{ marginBottom: "20px" }}>
+        <p>科目: {book.subject ? book.subject : "未設定"}</p>
+        <p>学年: {book.grade ? book.grade : "未設定"}</p>
+        <p>ISBN: {book.isbn ? book.isbn : "未設定"}</p>
       </div>
 
       {/* リクエストボタン */}

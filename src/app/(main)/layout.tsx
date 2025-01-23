@@ -71,7 +71,7 @@ const Layout: FC<Props> = ({ children }) => {
     <div className={styles.root}>
       <aside
         className={styles.sidebar}
-        style={{ width: menuOpen ? "200px" : "60px" }}
+        style={{ width: menuOpen ? "300px" : "60px" }}
       >
         <div
           className={styles.hamburger}

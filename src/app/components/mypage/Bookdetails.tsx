@@ -203,7 +203,6 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
             .map((request) => (
               <div key={request.id} style={{ marginBottom: "20px" }}>
                 <p>リクエストID: {request.id}</p>
-                <p>ステータス: {request.status}</p>
                 <div className="flex items-center justify-end space-x-3">
                   <button
                     className="cursor-pointer"
