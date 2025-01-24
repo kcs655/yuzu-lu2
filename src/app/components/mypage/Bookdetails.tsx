@@ -8,7 +8,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { ArticleJsonLd, NextSeo } from "next-seo";
 import { FilePenLine, Loader2, Trash2 } from "lucide-react";
-import parse from "html-react-parser"; // ここに追加
+import parse from "html-react-parser";
 
 interface BookDetailProps {
   book: BookType;
@@ -22,9 +22,12 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
 
   useEffect(() => {
     const fetchRequests = async () => {
+      // ★ ここで外部キー名を明示して JOIN
+      //    例: profiles!<外部キー名>(email)
+      //    'request_requester_id_fkey' は、SupabaseダッシュボードのRelationshipsで確認した実際の名前に合わせてください。
       const { data: requestData, error } = await supabase
         .from("request")
-        .select("*")
+        .select("*, profiles!request_requester_id_fkey1(email)")
         .eq("textbook_id", book.id); // textbook_id が一致するデータを取得
 
       if (error) {
@@ -53,8 +56,8 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
     }
 
     setRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request.id === requestId ? { ...request, status } : request
+      prevRequests.map((req) =>
+        req.id === requestId ? { ...req, status } : req
       )
     );
   };
@@ -87,9 +90,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
           .remove([`${book.user_id}/${fileName}`]);
 
         if (storageError) {
-          console.error(
-            `Storage delete error: ${JSON.stringify(storageError)}`
-          );
+          console.error(`Storage delete error: ${JSON.stringify(storageError)}`);
           setIsLoading(false);
           return;
         }
@@ -192,17 +193,22 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
           </button>
         </div>
       )}
+
+      {/* リクエスト一覧 */}
       <div style={{ marginTop: "40px" }}>
         <h2>リクエスト一覧</h2>
-        {requests.filter((request) => request.status === "wait").length ===
-        0 ? (
+        {requests.filter((req) => req.status === "wait").length === 0 ? (
           <p>現在、待機中のリクエストはありません。</p>
         ) : (
           requests
-            .filter((request) => request.status === "wait")
+            .filter((req) => req.status === "wait")
             .map((request) => (
               <div key={request.id} style={{ marginBottom: "20px" }}>
-                <p>リクエストID: {request.id}</p>
+                {/* ★ メールアドレスを表示する */}
+                <p>
+                  メールアドレス:{" "}
+                  {request.profiles?.email || "メールアドレス不明"}
+                </p>
                 <div className="flex items-center justify-end space-x-3">
                   <button
                     className="cursor-pointer"

@@ -5,12 +5,8 @@ import { supabase } from "../../../../lib/supabase"; // ★ 直接インポー�
 import { useRouter, useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 
-// ユーザーIDを取得する方法をどこかで用意してください
-// 例: useStore() or supabase.auth.getUser() など
-
-// ★ ここで「ファイル名正規化関数」を定義 ★
+// ファイル名正規化関数 (日本語・スペースを安全な文字に変換)
 function normalizeFilename(originalName: string): string {
-  // 例: 半角英数字, '.', '-', '_' 以外を '_' に置き換える
   return originalName.replace(/[^a-zA-Z0-9.\-_]/g, "_");
 }
 
@@ -31,9 +27,7 @@ export default function EditTextbookForm() {
   const searchParams = useSearchParams();
   const textbookId = searchParams.get("id");
 
-  // [!] ユーザーIDを使うためのステートを定義 (例)
   const [userId, setUserId] = useState<string | null>(null);
-
   const [textbook, setTextbook] = useState<Textbook | null>(null);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -44,21 +38,19 @@ export default function EditTextbookForm() {
   const [existingImageUrl, setExistingImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  // ----------------------
-  // 1) ユーザー情報の取得 (例)
-  // ----------------------
+  // ユーザー情報の取得
   useEffect(() => {
     (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
       }
     })();
   }, []);
 
-  // ----------------------
-  // 2) データ取得の useEffect
-  // ----------------------
+  // テキスト情報の取得
   useEffect(() => {
     if (!textbookId) return;
 
@@ -89,17 +81,13 @@ export default function EditTextbookForm() {
     fetchData();
   }, [textbookId]);
 
-  // ------------------------------
-  // 画像を選択したときのハンドラ
-  // ------------------------------
+  // 画像選択
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     setImageFile(e.target.files[0]);
   };
 
-  // -----------------------------
-  // 3) フォーム送信(更新)のハンドラ
-  // -----------------------------
+  // フォーム送信
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!textbook) {
@@ -114,9 +102,9 @@ export default function EditTextbookForm() {
     try {
       let newImageUrl = existingImageUrl;
 
-      // 画像差し替えがある場合
+      // 画像を差し替える場合
       if (imageFile) {
-        // 古い画像削除 (必要に応じて)
+        // 古い画像を削除
         if (existingImageUrl) {
           const { path } = extractBucketAndPathFromPublicUrl(existingImageUrl);
           if (path) {
@@ -124,19 +112,13 @@ export default function EditTextbookForm() {
           }
         }
 
-        // ★ ここで「ファイル名正規化」
-        const originalName = imageFile.name;
-        const safeName = normalizeFilename(originalName);
-
-        // ★ ここで userId と uuidv4 を使ってアップロード
-        //    (例) "ユーザーID/UUID_正規化したファイル名"
+        // ファイル名を正規化し、アップロードパスを作る
+        const safeName = normalizeFilename(imageFile.name);
         const filePath = `${userId}/${uuidv4()}_${safeName}`;
 
-        // ---- ここがご要望の箇所 ----
-        const { data: storageData, error: storageError } =
-          await supabase.storage
-            .from("textbook")
-            .upload(filePath, imageFile);
+        const { data: storageData, error: storageError } = await supabase.storage
+          .from("textbook")
+          .upload(filePath, imageFile);
 
         if (storageError) {
           console.error("Upload error:", storageError);
@@ -144,7 +126,7 @@ export default function EditTextbookForm() {
           return;
         }
 
-        // 公開URLの取得
+        // 公開URLを取得
         const { data: publicUrlData } = supabase.storage
           .from("textbook")
           .getPublicUrl(storageData.path);
@@ -154,7 +136,7 @@ export default function EditTextbookForm() {
         }
       }
 
-      // 教科書情報を UPDATE
+      // DB更新
       const { error: updateError } = await supabase
         .from("textbook")
         .update({
@@ -181,92 +163,146 @@ export default function EditTextbookForm() {
     }
   };
 
-  // ---------------------------------------
-  // 既存URLからストレージパスを取り出す関数
-  // ---------------------------------------
+  // ストレージ上のパスを取り出す
   const extractBucketAndPathFromPublicUrl = (url: string) => {
     const bucket = "textbook";
     const idx = url.indexOf(bucket + "/");
     if (idx === -1) return { bucket: "", path: "" };
-    const path = url.substring(idx + bucket.length + 1); // "textbook/" の後ろを取得
+    const path = url.substring(idx + bucket.length + 1);
     return { bucket, path };
   };
 
-  // ----------------
-  // 画面レンダリング
-  // ----------------
+  // --- レンダリング ---
   return (
-    <div>
-      <h1>教科書の編集</h1>
+    <div className="max-w-screen-md mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">教科書の編集</h1>
+
       {!textbook ? (
-        <p>データ読み込み中...</p>
+        <p>データを読み込み中...</p>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* タイトル */}
           <div>
-            <label>タイトル:</label>
+            <label className="block mb-1 font-semibold" htmlFor="title">
+              タイトル <span className="text-red-500">*</span>
+            </label>
             <input
+              id="title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
+              className="w-full rounded border-gray-300 focus:ring focus:ring-yellow-400 px-3 py-2"
             />
           </div>
+
+          {/* 著者 */}
           <div>
-            <label>著者:</label>
+            <label className="block mb-1 font-semibold" htmlFor="author">
+              著者
+            </label>
             <input
+              id="author"
               type="text"
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
+              className="w-full rounded border-gray-300 focus:ring focus:ring-yellow-400 px-3 py-2"
             />
           </div>
+
+          {/* 科目 */}
           <div>
-            <label>科目:</label>
+            <label className="block mb-1 font-semibold" htmlFor="subject">
+              科目
+            </label>
             <input
+              id="subject"
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
+              className="w-full rounded border-gray-300 focus:ring focus:ring-yellow-400 px-3 py-2"
             />
           </div>
+
+          {/* 学年 */}
           <div>
-            <label>学年:</label>
+            <label className="block mb-1 font-semibold" htmlFor="grade">
+              学年
+            </label>
             <input
+              id="grade"
               type="number"
               value={grade ?? ""}
               onChange={(e) => setGrade(Number(e.target.value))}
+              className="w-full rounded border-gray-300 focus:ring focus:ring-yellow-400 px-3 py-2"
             />
           </div>
+
+          {/* ISBN */}
           <div>
-            <label>ISBN:</label>
+            <label className="block mb-1 font-semibold" htmlFor="isbn">
+              ISBN
+            </label>
             <input
+              id="isbn"
               type="text"
               value={isbn}
               onChange={(e) => setIsbn(e.target.value)}
+              className="w-full rounded border-gray-300 focus:ring focus:ring-yellow-400 px-3 py-2"
             />
           </div>
+
+          {/* 詳細 */}
           <div>
-            <label>詳細:</label>
+            <label className="block mb-1 font-semibold" htmlFor="details">
+              詳細
+            </label>
             <textarea
+              id="details"
               value={details}
               onChange={(e) => setDetails(e.target.value)}
+              className="w-full rounded border-gray-300 focus:ring focus:ring-yellow-400 px-3 py-2"
+              rows={5}
             />
           </div>
+
+          {/* 既存画像プレビュー */}
           <div>
-            <label>現在の画像:</label>
+            <span className="block mb-1 font-semibold">現在の画像</span>
             {existingImageUrl ? (
               <img
                 src={existingImageUrl}
                 alt="Current"
-                style={{ maxWidth: 200 }}
+                className="max-w-[200px] mb-2 border rounded"
               />
             ) : (
-              <p>画像なし</p>
+              <p className="text-gray-500 mb-2">画像なし</p>
             )}
           </div>
+
+          {/* 画像アップロード */}
           <div>
-            <label>画像を変更する:</label>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
+            <label className="block mb-1 font-semibold" htmlFor="newImage">
+              画像を変更する
+            </label>
+            <input
+              id="newImage"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="block"
+            />
           </div>
-          <button type="submit">更新する</button>
+
+          {/* 更新ボタン */}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="bg-yellow-500 text-white font-semibold px-6 py-2 rounded hover:brightness-110 transition"
+            >
+              更新する
+            </button>
+          </div>
         </form>
       )}
     </div>

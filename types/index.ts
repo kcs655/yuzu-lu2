@@ -27,4 +27,7 @@ export interface RequestType {
   updated_at: string;
   created_at: string;
   status: string; // ここに status を追加
+  profiles: {
+    email: string;
+  }
 }

@@ -1,11 +1,10 @@
 // app/edit/page.tsx
 "use client";
-import EditTextbookForm from "@/app/components/mypage/BlogEdit";
+import EditTextbookForm from "@/app/components/mypage/BookEdit";
 
 export default function Page() {
   return (
     <div>
-      <h1>教科書の編集ページ</h1>
       <EditTextbookForm />
     </div>
   );
