@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { BookType } from "../../../../types";
 import { supabase } from "../../../../lib/supabase";
@@ -31,7 +31,9 @@ const WishDetail = ({ book }: WishDetailProps) => {
 
   // requestテーブルのレコードを丸ごと保持
   // (null ならリクエストなし)
-  const [requestRecord, setRequestRecord] = useState<RequestRecord | null>(null);
+  const [requestRecord, setRequestRecord] = useState<RequestRecord | null>(
+    null
+  );
 
   // wantbookテーブル削除ボタンを押せるか？ → requestがある場合は無効化
   const isWantbookDisabled = !!requestRecord;
@@ -39,6 +41,9 @@ const WishDetail = ({ book }: WishDetailProps) => {
   // 「リクエストを削除」ボタンを押せるか？ → statusが"consent"なら無効化
   const isDeleteRequestDisabled =
     requestRecord?.status === "consent" ? true : false;
+
+  // useRefを使用して、現在のサブスクリプションを追跡
+  const currentSubscription = useRef<any>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,13 +62,15 @@ const WishDetail = ({ book }: WishDetailProps) => {
     fetchUser();
   }, [setUser]);
 
-  // 既にリクエストがあるかどうかチェック
+  // 既にリクエストがあるかどうかチェック + Realtime Listener
   useEffect(() => {
+    // リクエストを確認する関数 (Realtime Listener と DELETE イベントハンドラから呼び出す)
     const checkRequest = async () => {
+      console.log("Checking request...");
       if (user?.id) {
         const { data: requestData, error } = await supabase
           .from("request")
-          .select("*") 
+          .select("*")
           .eq("requester_id", user.id)
           .eq("textbook_id", book.id);
 
@@ -71,6 +78,8 @@ const WishDetail = ({ book }: WishDetailProps) => {
           console.error("Error checking request:", error.message);
           return;
         }
+
+        console.log("Request data:", requestData);
 
         // もし既にレコードがあれば、最初の1件を保持
         if (requestData && requestData.length > 0) {
@@ -81,7 +90,76 @@ const WishDetail = ({ book }: WishDetailProps) => {
       }
     };
 
+    // コンポーネントのマウント時にリクエストを確認
     checkRequest();
+
+    // ユーザーが変更された場合、またはコンポーネントがアンマウントされる場合に、
+    // 前のサブスクリプションをクリーンアップ
+    if (currentSubscription.current) {
+      supabase.removeChannel(currentSubscription.current);
+      currentSubscription.current = null;
+    }
+
+    // Realtime Listener の設定
+    const channelName = `request-changes-book-${book.id}`;
+    console.log("Channel name:", channelName);
+
+    const requestSubscription = supabase
+      .channel(channelName)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "request",
+          filter: `textbook_id=eq.${book.id}`,
+        },
+        async (payload) => {
+          console.log("Realtime event received:", payload);
+
+          if (
+            payload.eventType === "INSERT" ||
+            payload.eventType === "UPDATE"
+          ) {
+            if (
+              typeof payload.new === "object" &&
+              payload.new !== null &&
+              "requester_id" in payload.new &&
+              user?.id &&
+              payload.new.requester_id === user.id
+            ) {
+              // 最新のデータを取得して設定
+              const { data, error } = await supabase
+                .from("request")
+                .select("*")
+                .eq("id", payload.new.id)
+                .single();
+
+              if (!error && data) {
+                console.log("Setting request record:", data);
+                setRequestRecord(data as RequestRecord);
+              }
+            }
+          } else if (payload.eventType === "DELETE") {
+            if (requestRecord && payload.old.id === requestRecord.id) {
+              console.log("Clearing request record after DELETE");
+              setRequestRecord(null);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    // サブスクリプションを保存
+    currentSubscription.current = requestSubscription;
+
+    // Cleanup function
+    return () => {
+      if (currentSubscription.current) {
+        supabase.removeChannel(currentSubscription.current);
+        currentSubscription.current = null;
+      }
+    };
   }, [user?.id, book.id]);
 
   // リクエストボタン押下 → requestにINSERT
@@ -103,9 +181,6 @@ const WishDetail = ({ book }: WishDetailProps) => {
           setError(error.message);
           setMessage("");
           return;
-        }
-        if (data) {
-          setRequestRecord(data); // 取得したレコードをセット
         }
 
         setMessage("リクエストが送信されました。");
@@ -139,10 +214,10 @@ const WishDetail = ({ book }: WishDetailProps) => {
         return;
       }
 
-      // 削除成功 → ステートをnullにし、ボタンも消える
-      setRequestRecord(null);
       setMessage("リクエストを削除しました。");
       setError("");
+
+      setRequestRecord(null);
     } catch (err: any) {
       console.error("Delete request error:", err);
       setError("リクエスト削除中にエラーが発生しました。");
@@ -234,7 +309,9 @@ const WishDetail = ({ book }: WishDetailProps) => {
       </div>
 
       {/* タイトル */}
-      <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}>
+      <h1
+        style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}
+      >
         {book.title}
       </h1>
       {/* 更新日時 */}
@@ -244,7 +321,9 @@ const WishDetail = ({ book }: WishDetailProps) => {
 
       {/* 詳細 */}
       <div style={{ marginBottom: "20px" }}>
-        <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>
+        <h2
+          style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}
+        >
           詳細
         </h2>
         <p>{parse(formatDescription(book.details))}</p>
@@ -304,8 +383,12 @@ const WishDetail = ({ book }: WishDetailProps) => {
       </div>
 
       {/* メッセージ表示 */}
-      {error && <div style={{ color: "red", textAlign: "center" }}>{error}</div>}
-      {message && <div style={{ color: "green", textAlign: "center" }}>{message}</div>}
+      {error && (
+        <div style={{ color: "red", textAlign: "center" }}>{error}</div>
+      )}
+      {message && (
+        <div style={{ color: "green", textAlign: "center" }}>{message}</div>
+      )}
     </div>
   );
 };

@@ -22,26 +22,72 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
 
   useEffect(() => {
     const fetchRequests = async () => {
-      // ★ ここで外部キー名を明示して JOIN
-      //    例: profiles!<外部キー名>(email)
-      //    'request_requester_id_fkey' は、SupabaseダッシュボードのRelationshipsで確認した実際の名前に合わせてください。
       const { data: requestData, error } = await supabase
         .from("request")
         .select("*, profiles!request_requester_id_fkey1(email)")
-        .eq("textbook_id", book.id); // textbook_id が一致するデータを取得
+        .eq("textbook_id", book.id);
 
       if (error) {
         console.error("Error fetching requests:", error);
         setIsLoading(false);
         return;
       }
-
-      console.log("Fetched requests:", requestData);
       setRequests(requestData as RequestType[]);
       setIsLoading(false);
     };
 
     fetchRequests();
+
+    const channel = supabase
+      .channel(`request-changes-${book.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "request",
+          filter: `textbook_id=eq.${book.id}`,
+        },
+        async (payload) => {
+          console.log("Change received!", payload);
+
+          // 変更があった場合は、プロフィール情報も含めて最新データを取得
+          if (
+            payload.eventType === "INSERT" ||
+            payload.eventType === "UPDATE"
+          ) {
+            const { data: updatedRequest, error } = await supabase
+              .from("request")
+              .select("*, profiles!request_requester_id_fkey1(email)")
+              .eq("id", payload.new.id)
+              .single();
+
+            if (!error && updatedRequest) {
+              setRequests((prevRequests) => {
+                const existingIndex = prevRequests.findIndex(
+                  (req) => req.id === updatedRequest.id
+                );
+                return existingIndex >= 0
+                  ? prevRequests.map((req) =>
+                      req.id === updatedRequest.id ? updatedRequest : req
+                    )
+                  : [...prevRequests, updatedRequest];
+              });
+            }
+          } else if (payload.eventType === "DELETE") {
+            // 削除の場合はすぐにstateから削除
+            console.log("Removing request:", payload.old.id);
+            setRequests((prevRequests) =>
+              prevRequests.filter((req) => req.id !== payload.old.id)
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [book.id]);
 
   const handleStatusChange = async (requestId: string, status: string) => {
@@ -90,7 +136,9 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
           .remove([`${book.user_id}/${fileName}`]);
 
         if (storageError) {
-          console.error(`Storage delete error: ${JSON.stringify(storageError)}`);
+          console.error(
+            `Storage delete error: ${JSON.stringify(storageError)}`
+          );
           setIsLoading(false);
           return;
         }
