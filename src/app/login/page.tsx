@@ -9,20 +9,38 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState(""); // エラーメッセージの状態
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      console.error(error.message);
-    } else {
-      console.log("User logged in:", data);
-      alert("ログイン成功");
-      router.refresh();
-      router.push("/mypage");
+    setErrorMessage(""); // ログイン試行時にエラーメッセージをリセット
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        console.error(error.message);
+        // Supabaseのエラーメッセージをユーザーにわかりやすいメッセージに変換
+        switch (error.message) {
+          case "Invalid login credentials":
+            setErrorMessage("メールアドレスまたはパスワードが間違っています。");
+            break;
+          case "Email not confirmed":
+            setErrorMessage("メールアドレスが確認されていません。確認メールを確認してください。");
+            break;
+          default:
+            setErrorMessage("ログインに失敗しました。"); 
+        }
+      } else {
+        console.log("User logged in:");
+        alert("ログイン成功");
+        router.refresh();
+        router.push("/mypage");
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      setErrorMessage("予期せぬエラーが発生しました。");
     }
   };
 
@@ -39,23 +57,23 @@ const Login = () => {
       }}>
         {/* 左上にホームへ戻るリンク */}
         <div style={{ position: 'absolute', left: '1rem' }}>
-      <Link href="/" style={{ cursor: 'pointer' }}>
-        <Image
-          src="/modoru.png"  //modoru.png を参照
-          alt="戻る"
-          width={40}             // お好みでサイズ調整してください
-          height={40}
-        />
-      </Link>
-    </div>
+        <Link href="/" style={{ cursor: 'pointer' }}>
+          <Image
+            src="/modoru.png" 
+            alt="戻る"
+            width={40} 
+            height={40}
+          />
+        </Link>
+      </div>
         <h1 style={{ margin: 0 }}>
-        <Image
-          src="/images/logo.png"  // ここは実際の画像パスに変えてください
-          alt="Yuzu➡Lu"
-          width={200}                  // 画像サイズに合わせて変更
-          height={200}                 // 画像サイズに合わせて変更
-        />
-      </h1>
+          <Image
+            src="/images/logo.png" 
+            alt="Yuzu➡Lu"
+            width={200} 
+            height={200} 
+          />
+        </h1>
       </header>
 
       {/* メインコンテンツ */}
@@ -84,6 +102,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
             />
+            {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>} {/* エラーメッセージを表示 */}
             <button type="submit" style={{ 
               padding: '0.5rem', 
               background: '#0070f3', 
