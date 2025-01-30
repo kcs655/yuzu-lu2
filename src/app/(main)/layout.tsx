@@ -3,9 +3,15 @@ import { FC, ReactNode, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
-import { UploadedImage } from "../../../styles/icon";
 import styles from "./Layout.module.css";
-import { House, Settings, Search, Upload, MessageSquare, Bookmark, } from "lucide-react";
+import {
+  House,
+  Settings,
+  Search,
+  Upload,
+  MessageSquare,
+  Bookmark,
+} from "lucide-react";
 
 type Props = {
   children: ReactNode;
@@ -21,32 +27,32 @@ const navigations: Navigation[] = [
   {
     pageName: "マイページ",
     path: "/mypage",
-    icon: <House />,
+    icon: <House color="white" />,
   },
   {
     pageName: "教科書検索",
     path: "/search",
-    icon: <Search />,
+    icon: <Search color="white" />,
   },
   {
     pageName: "教科書登録",
     path: "/register-textbook",
-    icon: <Upload />,
+    icon: <Upload color="white" />,
   },
   {
     pageName: "欲しい教科書",
     path: "/wish-list",
-    icon: <Bookmark />,
+    icon: <Bookmark color="white" />,
   },
   {
     pageName: "チャット",
     path: "/chats",
-    icon: <MessageSquare />,
+    icon: <MessageSquare color="white" />,
   },
   {
     pageName: "設定",
     path: "/setting",
-    icon: <Settings />,
+    icon: <Settings color="white" />,
   },
 ];
 
@@ -114,6 +120,16 @@ const Layout: FC<Props> = ({ children }) => {
           style={{ cursor: "pointer", marginTop: "auto", padding: "1rem" }}
           onClick={() => setShowLogoutConfirm(true)}
         >
+          {/* 画像アイコンを常に表示 */}
+          <img
+            src="/images/exit.png"
+            alt="Exit Icon"
+            style={{
+              width: "24px",
+              height: "24px",
+              marginRight: menuOpen ? "8px" : "0",
+            }}
+          />
           {menuOpen && (
             <p
               className={styles.pageName}
@@ -123,15 +139,6 @@ const Layout: FC<Props> = ({ children }) => {
                 margin: 0,
               }}
             >
-              <img
-                src="/images/exit.png"
-                alt="Exit Icon"
-                style={{
-                  width: "24px",
-                  height: "24px",
-                  marginRight: "8px",
-                }}
-              />
               ログアウト
             </p>
           )}
