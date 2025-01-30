@@ -267,16 +267,17 @@ const WishDetail = ({ book }: WishDetailProps) => {
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
+
   const formatDescription = (description: string): string => {
     if (!description) return "未設定";
-    return description.replace(/\n/g, "<br/>");
+    const sanitizedDescription = description.replace(/\n/g, "<br/>");
+    return sanitizedDescription;
   };
-  const ogImage = useMemo(() => {
-    return book.image_url || "/images/noimage.png";
-  }, [book.image_url]);
+
+  const ogImage = book.image_url || "/images/noimage.png";
 
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <NextSeo
         title={book.title}
         openGraph={{
@@ -291,103 +292,126 @@ const WishDetail = ({ book }: WishDetailProps) => {
       />
       <ArticleJsonLd
         type="BlogPosting"
-        url={`https://www.example.com/textbook/${book.id}`}
+        url={`https://www.example.com/textbook/${book.id}`} // 実際のドメインに修正
         title={book.title}
         images={ogImage ? [ogImage] : []}
         datePublished={book.created_at}
-        authorName="Author Name"
+        authorName="Author Name" // 実際の著者名に修正
         description={book.details}
       />
 
-      {/* メイン画像 */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <img
-          src={ogImage}
-          alt={book.title}
-          style={{ maxWidth: "100%", height: "auto" }}
-        />
-      </div>
+      {/* メインコンテンツエリア */}
+      <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* 左カラム: 画像 */}
+          <div className="space-y-4">
+            <div className="aspect-w-3 aspect-h-4 bg-gray-100 rounded-lg overflow-hidden">
+              <img
+                src={ogImage}
+                alt={book.title}
+                className="object-cover w-full h-full"
+              />
+            </div>
+          </div>
 
-      {/* タイトル */}
-      <h1
-        style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}
-      >
-        {book.title}
-      </h1>
-      {/* 更新日時 */}
-      <p style={{ marginBottom: "10px" }}>{formatDate(book.updated_at)}</p>
-      {/* 著者 */}
-      {book.author && <p style={{ marginBottom: "20px" }}>{book.author}</p>}
+          {/* 右カラム: 基本情報 */}
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                {book.title}
+              </h1>
+              <p className="text-sm text-gray-500">
+                更新日: {formatDate(book.updated_at)}
+              </p>
+              {book.author && (
+                <p className="text-md text-gray-700">著者: {book.author}</p>
+              )}
+            </div>
 
-      {/* 詳細 */}
-      <div style={{ marginBottom: "20px" }}>
-        <h2
-          style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}
-        >
-          詳細
-        </h2>
-        <p>{parse(formatDescription(book.details))}</p>
-      </div>
+            {/* 基本情報カード */}
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">科目</p>
+                  <p className="font-medium">{book.subject || "未設定"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">学年</p>
+                  <p className="font-medium">{book.grade || "未設定"}年</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-500">ISBN</p>
+                  <p className="font-medium">{book.isbn || "未設定"}</p>
+                </div>
+              </div>
+            </div>
+            {/* リクエスト関連 */}
+            <div className="text-center">
+              {/* リクエストがない時 → リクエストボタンを表示 */}
+              {!requestRecord && (
+                <button
+                  onClick={handleRequest}
+                  className="w-full text-white bg-yellow-500 hover:bg-yellow-600 rounded-md py-2 px-4 mb-4 transition-colors"
+                >
+                  リクエスト
+                </button>
+              )}
 
-      {/* 科目 / 学年 / ISBN */}
-      <div style={{ marginBottom: "20px" }}>
-        <p>科目: {book.subject ? book.subject : "未設定"}</p>
-        <p>学年: {book.grade ? book.grade : "未設定"}</p>
-        <p>ISBN: {book.isbn ? book.isbn : "未設定"}</p>
-      </div>
+              {/* リクエストがある時 → リクエスト削除ボタンを表示 */}
+              {requestRecord && (
+                <button
+                  onClick={handleDeleteRequest}
+                  className={`w-full text-white rounded-md py-2 px-4 transition-colors ${
+                    isDeleteRequestDisabled
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-red-500 hover:bg-red-600"
+                  }`}
+                  disabled={isDeleteRequestDisabled}
+                >
+                  リクエストを削除
+                </button>
+              )}
 
-      {/* リクエスト関連 */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        {/* リクエストがない時 → リクエストボタンを表示 */}
-        {!requestRecord && (
-          <button
-            onClick={handleRequest}
-            className="w-full text-white bg-yellow-500 hover:brightness-110 rounded py-1 px-8 mb-4"
-          >
-            リクエスト
-          </button>
-        )}
+              {/* status === "consent"の場合、リクエスト削除ボタンが無効化される */}
+              {/* ↑ isDeleteRequestDisabled が true */}
+            </div>
 
-        {/* リクエストがある時 → リクエスト削除ボタンを表示 */}
-        {requestRecord && (
-          <button
-            onClick={handleDeleteRequest}
-            className={`w-full text-white rounded py-1 px-8 ${
-              isDeleteRequestDisabled
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-red-500 hover:brightness-110"
-            }`}
-            disabled={isDeleteRequestDisabled}
-          >
-            リクエストを削除
-          </button>
-        )}
+            {/* wantbook のレコード削除ボタン (requestがある場合は無効化) */}
+            <div className="text-center">
+              <button
+                onClick={handleDeleteWantbook}
+                className={`w-full text-white rounded-md py-2 px-4 transition-colors ${
+                  isWantbookDisabled
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600"
+                }`}
+                disabled={isWantbookDisabled}
+              >
+                欲しい教科書から削除
+              </button>
+            </div>
+          </div>
+        </div>
 
-        {/* status === "consent"の場合、リクエスト削除ボタンが無効化される */}
-        {/* ↑ isDeleteRequestDisabled が true */}
-      </div>
-
-      {/* wantbook のレコード削除ボタン (requestがある場合は無効化) */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <button
-          onClick={handleDeleteWantbook}
-          className={`w-full text-white rounded py-1 px-8 ${
-            isWantbookDisabled
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-red-500 hover:brightness-110"
-          }`}
-          disabled={isWantbookDisabled}
-        >
-          欲しい教科書から削除
-        </button>
+        {/* 詳細説明 */}
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">詳細</h2>
+          <div className="prose max-w-none">
+            {parse(formatDescription(book.details))}
+          </div>
+        </div>
       </div>
 
       {/* メッセージ表示 */}
       {error && (
-        <div style={{ color: "red", textAlign: "center" }}>{error}</div>
+        <div className="text-center mt-4">
+          <p className="text-red-500">{error}</p>
+        </div>
       )}
       {message && (
-        <div style={{ color: "green", textAlign: "center" }}>{message}</div>
+        <div className="text-center mt-4">
+          <p className="text-green-500">{message}</p>
+        </div>
       )}
     </div>
   );

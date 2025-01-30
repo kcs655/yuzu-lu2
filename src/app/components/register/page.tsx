@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
 import { v4 as uuidv4 } from "uuid";
 import useStore from "../../../../store";
+import Image from "next/image";
 
 const TextbookNew = () => {
   const router = useRouter();
@@ -13,9 +14,10 @@ const TextbookNew = () => {
   const authorRef = useRef<HTMLInputElement>(null!);
   const subjectRef = useRef<HTMLInputElement>(null!);
   const gradeRef = useRef<HTMLInputElement>(null!);
-  const isbnRef = useRef<HTMLInputElement>(null!); // Add this line
+  const isbnRef = useRef<HTMLInputElement>(null!);
   const detailsRef = useRef<HTMLTextAreaElement>(null!);
   const [image, setImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null); // 画像URLの状態を追加
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,7 +37,16 @@ const TextbookNew = () => {
       if (!files || files.length === 0) {
         return;
       }
-      setImage(files[0]);
+
+      const file = files[0];
+      setImage(file);
+
+      // 画像のプレビューURLを生成
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImageUrl(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     },
     []
   );
@@ -45,7 +56,7 @@ const TextbookNew = () => {
     e.preventDefault();
     console.log("onSubmit called");
     if (user.id) {
-      let imageUrl: string | undefined = undefined;
+      let uploadedImageUrl: string | undefined = undefined;
       if (image) {
         // supabaseストレージに画像アップロード
         const { data: storageData, error: storageError } =
@@ -66,7 +77,7 @@ const TextbookNew = () => {
         const { data: urlData } = await supabase.storage
           .from("textbook")
           .getPublicUrl(storageData.path);
-        imageUrl = urlData.publicUrl;
+        uploadedImageUrl = urlData.publicUrl;
       }
 
       // 教科書データを新規作成
@@ -75,9 +86,9 @@ const TextbookNew = () => {
         author: authorRef.current.value,
         subject: subjectRef.current.value,
         grade: parseInt(gradeRef.current.value, 10),
-        isbn: isbnRef.current.value, // Add this line
+        isbn: isbnRef.current.value,
         details: detailsRef.current.value,
-        image_url: imageUrl,
+        image_url: uploadedImageUrl,
         user_id: user.id,
       });
 
@@ -97,7 +108,9 @@ const TextbookNew = () => {
     <div className="max-w-screen-md mx-auto">
       <form onSubmit={onSubmit}>
         <div className="mb-5">
-          <div className="text-sm mb-1">タイトル</div>
+          <label htmlFor="title" className="text-sm mb-1 block">
+            タイトル<span className="text-red-500">*</span>
+          </label>
           <input
             className="w-full bg-gray-100 rounded border py-1 px-3 outline-none focus:bg-transparent focus:ring-2 focus:ring-yellow-500"
             ref={titleRef}
@@ -109,7 +122,9 @@ const TextbookNew = () => {
         </div>
 
         <div className="mb-5">
-          <div className="text-sm mb-1">著者</div>
+          <label htmlFor="author" className="text-sm mb-1 block">
+            著者
+          </label>
           <input
             className="w-full bg-gray-100 rounded border py-1 px-3 outline-none focus:bg-transparent focus:ring-2 focus:ring-yellow-500"
             ref={authorRef}
@@ -120,7 +135,9 @@ const TextbookNew = () => {
         </div>
 
         <div className="mb-5">
-          <div className="text-sm mb-1">科目</div>
+          <label htmlFor="subject" className="text-sm mb-1 block">
+            科目
+          </label>
           <input
             className="w-full bg-gray-100 rounded border py-1 px-3 outline-none focus:bg-transparent focus:ring-2 focus:ring-yellow-500"
             ref={subjectRef}
@@ -131,18 +148,24 @@ const TextbookNew = () => {
         </div>
 
         <div className="mb-5">
-          <div className="text-sm mb-1">学年</div>
+          <label htmlFor="grade" className="text-sm mb-1 block">
+            学年
+          </label>
           <input
             className="w-full bg-gray-100 rounded border py-1 px-3 outline-none focus:bg-transparent focus:ring-2 focus:ring-yellow-500"
             ref={gradeRef}
             type="number"
             id="grade"
             placeholder="Grade"
+            min="1"
+            max="4"
           />
         </div>
 
         <div className="mb-5">
-          <div className="text-sm mb-1">ISBN</div> {/* Add this block */}
+          <label htmlFor="isbn" className="text-sm mb-1 block">
+            ISBN
+          </label>
           <input
             className="w-full bg-gray-100 rounded border py-1 px-3 outline-none focus:bg-transparent focus:ring-2 focus:ring-yellow-500"
             ref={isbnRef}
@@ -153,7 +176,9 @@ const TextbookNew = () => {
         </div>
 
         <div className="mb-5">
-          <div className="text-sm mb-1">詳細</div>
+          <label htmlFor="details" className="text-sm mb-1 block">
+            詳細
+          </label>
           <textarea
             className="w-full bg-gray-100 rounded border py-1 px-3 outline-none focus:bg-transparent focus:ring-2 focus:ring-yellow-500"
             ref={detailsRef}
@@ -164,8 +189,27 @@ const TextbookNew = () => {
         </div>
 
         <div className="mb-5">
-          <div className="text-sm mb-1">画像</div>
-          <input type="file" id="image" onChange={onUploadImage} />
+          <label htmlFor="image" className="text-sm mb-1 block">
+            画像
+          </label>
+          <input
+            type="file"
+            id="image"
+            accept="image/*"
+            onChange={onUploadImage}
+          />
+          {/* 画像プレビュー */}
+          {imageUrl && (
+            <div className="mt-2">
+              <Image
+                src={imageUrl}
+                alt="プレビュー画像"
+                width={200}
+                height={200}
+                objectFit="contain"
+              />
+            </div>
+          )}
         </div>
 
         <div className="text-center mb-5">

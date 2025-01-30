@@ -174,7 +174,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
   const ogImage = book.image_url || "/images/noimage.png";
 
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <NextSeo
         title={book.title}
         openGraph={{
@@ -196,101 +196,139 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
         authorName="Author Name" // 実際の著者名に修正
         description={book.details}
       />
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <img
-          src={ogImage}
-          alt={book.title}
-          style={{ maxWidth: "100%", height: "auto" }}
-        />
-      </div>
-      <h1
-        style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}
-      >
-        {book.title}
-      </h1>
-      <p style={{ marginBottom: "10px" }}>{formatDate(book.updated_at)}</p>
-      {book.author && <p style={{ marginBottom: "20px" }}>{book.author}</p>}
-      <div style={{ marginBottom: "20px" }}>
-        <h2
-          style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}
-        >
-          詳細
-        </h2>
-        <p>{parse(formatDescription(book.details))}</p>
-      </div>
-      <div style={{ marginBottom: "20px" }}>
-        <p>科目: {book.subject ? book.subject : "未設定"}</p>
-        <p>学年: {book.grade ? book.grade : "未設定"}</p>
-        <p>ISBN: {book.isbn ? book.isbn : "未設定"}</p>
-      </div>
-      {isMyBook && (
-        <div className="flex items-center justify-end space-x-3">
-          <Link href={`/mypage/${book.id}/edit?id=${book.id}`}>
-            <FilePenLine className="w-6 h-6" />
-          </Link>
-          <button
-            className="cursor-pointer"
-            onClick={handleDelete}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Loader2 className="h-6 w-6 animate-spin text-red-500" />
-            ) : (
-              <Trash2 className="w-6 h-6 text-red-500" />
-            )}
-          </button>
-        </div>
-      )}
 
-      {/* リクエスト一覧 */}
-      <div style={{ marginTop: "40px" }}>
-        <h2>リクエスト一覧</h2>
-        {requests.filter((req) => req.status === "wait").length === 0 ? (
-          <p>現在、待機中のリクエストはありません。</p>
-        ) : (
-          requests
-            .filter((req) => req.status === "wait")
-            .map((request) => (
-              <div key={request.id} style={{ marginBottom: "20px" }}>
-                {/* ★ メールアドレスを表示する */}
-                <p>
-                  メールアドレス:{" "}
-                  {request.profiles?.email || "メールアドレス不明"}
-                </p>
-                <div className="flex items-center justify-end space-x-3">
-                  <button
-                    className="cursor-pointer"
-                    style={{
-                      padding: "10px 20px",
-                      backgroundColor: "#5cb85c",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                      marginRight: "10px",
-                    }}
-                    onClick={() => handleStatusChange(request.id, "consent")}
-                  >
-                    承諾
-                  </button>
-                  <button
-                    className="cursor-pointer"
-                    style={{
-                      padding: "10px 20px",
-                      backgroundColor: "#d9534f",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => handleStatusChange(request.id, "rejection")}
-                  >
-                    拒否
-                  </button>
+      {/* メインコンテンツエリア */}
+      <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* 左カラム: 画像 */}
+          <div className="space-y-4">
+            <div className="aspect-w-3 aspect-h-4 bg-gray-100 rounded-lg overflow-hidden">
+              <img
+                src={ogImage}
+                alt={book.title}
+                className="object-cover w-full h-full"
+              />
+            </div>
+          </div>
+
+          {/* 右カラム: 基本情報 */}
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                {book.title}
+              </h1>
+              <p className="text-sm text-gray-500">
+                更新日: {formatDate(book.updated_at)}
+              </p>
+              {book.author && (
+                <p className="text-md text-gray-700">著者: {book.author}</p>
+              )}
+            </div>
+
+            {/* 基本情報カード */}
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">科目</p>
+                  <p className="font-medium">{book.subject || "未設定"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">学年</p>
+                  <p className="font-medium">{book.grade || "未設定"}年</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-500">ISBN</p>
+                  <p className="font-medium">{book.isbn || "未設定"}</p>
                 </div>
               </div>
-            ))
-        )}
+            </div>
+
+            {/* 編集/削除ボタン */}
+            {isMyBook && (
+              <div className="flex justify-end space-x-4">
+                <Link
+                  href={`/mypage/${book.id}/edit?id=${book.id}`}
+                  className="flex items-center text-yellow-600 hover:text-yellow-700 transition-colors"
+                >
+                  <FilePenLine className="w-5 h-5 mr-1" />
+                  <span>編集</span>
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                  className="flex items-center text-red-600 hover:text-red-700 transition-colors disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Trash2 className="w-5 h-5 mr-1" />
+                      <span>削除</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 詳細説明 */}
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">詳細</h2>
+          <div className="prose max-w-none">
+            {parse(formatDescription(book.details))}
+          </div>
+        </div>
+
+        {/* リクエスト一覧 */}
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            リクエスト一覧
+          </h2>
+          <div className="space-y-4">
+            {requests.filter((req) => req.status === "wait").length === 0 ? (
+              <p className="text-gray-500 text-center py-4">
+                現在、待機中のリクエストはありません。
+              </p>
+            ) : (
+              requests
+                .filter((req) => req.status === "wait")
+                .map((request) => (
+                  <div
+                    key={request.id}
+                    className="bg-gray-50 rounded-lg p-4 flex items-center justify-between"
+                  >
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600">
+                        メールアドレス:{" "}
+                        <span className="font-medium text-gray-900">
+                          {request.profiles?.email || "メールアドレス不明"}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() =>
+                          handleStatusChange(request.id, "consent")
+                        }
+                        className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                      >
+                        承諾
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleStatusChange(request.id, "rejection")
+                        }
+                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                      >
+                        拒否
+                      </button>
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
