@@ -105,84 +105,103 @@ const SearchDetail = ({ book }: BookDetailProps) => {
   }, [book.image_url]);
 
   return (
-<div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-  <NextSeo
-    title={book.title}
-    openGraph={{
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    }}
-  />
-  <ArticleJsonLd
-    type="BlogPosting"
-    url={`https://www.example.com/textbook/${book.id}`} // 実際のドメインに修正
-    title={book.title}
-    images={ogImage ? [ogImage] : []}
-    datePublished={book.created_at}
-    authorName="Author Name" // 実際の著者名に修正
-    description={book.details}
-  />
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <NextSeo
+        title={book.title}
+        openGraph={{
+          images: [
+            {
+              url: ogImage,
+              width: 1200,
+              height: 630,
+            },
+          ],
+        }}
+      />
+      <ArticleJsonLd
+        type="BlogPosting"
+        url={`https://www.example.com/textbook/${book.id}`} // 実際のドメインに修正
+        title={book.title}
+        images={ogImage ? [ogImage] : []}
+        datePublished={book.created_at}
+        authorName="Author Name" // 実際の著者名に修正
+        description={book.details}
+      />
 
-  {/* メイン画像 */}
-  <div style={{ textAlign: "center", marginBottom: "20px" }}>
-    <img
-      src={ogImage}
-      alt={book.title}
-      style={{ maxWidth: "100%", height: "auto" }}
-    />
-  </div>
+      {/* メインコンテンツエリア */}
+      <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* 左カラム: 画像 */}
+          <div className="space-y-4">
+            <div className="aspect-w-3 aspect-h-4 bg-gray-100 rounded-lg overflow-hidden">
+              <img
+                src={ogImage}
+                alt={book.title}
+                className="object-cover w-full h-full"
+              />
+            </div>
+          </div>
 
-  {/* タイトル */}
-  <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "10px" }}>
-    {book.title}
-  </h1>
+          {/* 右カラム: 基本情報 */}
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                {book.title}
+              </h1>
+              <p className="text-sm text-gray-500">
+                更新日: {formatDate(book.updated_at)}
+              </p>
+              {book.author && (
+                <p className="text-md text-gray-700">著者: {book.author}</p>
+              )}
+            </div>
 
-  {/* 更新日時 */}
-  <p style={{ marginBottom: "10px" }}>{formatDate(book.updated_at)}</p>
+            {/* 基本情報カード */}
+            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">科目</p>
+                  <p className="font-medium">{book.subject || "未設定"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">学年</p>
+                  <p className="font-medium">{book.grade || "未設定"}年</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-gray-500">ISBN</p>
+                  <p className="font-medium">{book.isbn || "未設定"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-  {/* 著者 */}
-  {book.author && <p style={{ marginBottom: "20px" }}>{book.author}</p>}
-
-  {/* 詳細 */}
-  <div style={{ marginBottom: "20px" }}>
-    <h2 style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "10px" }}>
-      詳細
-    </h2>
-    <p>{parse(formatDescription(book.details))}</p>
-  </div>
-
-  {/* 科目 / 学年 / ISBN */}
-  <div style={{ marginBottom: "20px" }}>
-    <p>科目: {book.subject ? book.subject : "未設定"}</p>
-    <p>学年: {book.grade ? book.grade : "未設定"}</p>
-    <p>ISBN: {book.isbn ? book.isbn : "未設定"}</p>
-  </div>
-
-
-      {/* 「欲しい」ボタン */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <button
-          onClick={handleAddToWishlist}
-          className={`w-full text-white ${
-            isDisabled
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-yellow-500 hover:brightness-110"
-          } rounded py-1 px-8`}
-          disabled={isDisabled}
-        >
-          欲しい教科書リストに追加
-        </button>
-        {error && (
-          <div style={{ color: "red", textAlign: "center" }}>{error}</div>
-        )}
-        {message && (
-          <div style={{ color: "green", textAlign: "center" }}>{message}</div>
-        )}
+        {/* 詳細説明 */}
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">詳細</h2>
+          <div className="prose max-w-none">
+            {parse(formatDescription(book.details))}
+          </div>
+        </div>
+        {/* 「欲しい」ボタン */}
+        <div className="mt-8">
+          <button
+            onClick={handleAddToWishlist}
+            className={`w-full text-white rounded-md py-2 px-4 transition-colors ${
+              isDisabled
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-yellow-500 hover:bg-yellow-600"
+            }`}
+            disabled={isDisabled}
+          >
+            欲しい教科書リストに追加
+          </button>
+          {/* メッセージ表示 */}
+          <div className="text-center mt-4">
+            {error && <p className="text-red-500">{error}</p>}
+            {message && <p className="text-green-500">{message}</p>}
+          </div>
+        </div>
       </div>
     </div>
   );
