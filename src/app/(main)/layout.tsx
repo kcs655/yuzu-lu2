@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import { UploadedImage } from "../../../styles/icon";
 import styles from "./Layout.module.css";
+import { House, Settings, Search, Upload, MessageSquare, Bookmark, } from "lucide-react";
 
 type Props = {
   children: ReactNode;
@@ -20,32 +21,32 @@ const navigations: Navigation[] = [
   {
     pageName: "マイページ",
     path: "/mypage",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
+    icon: <House />,
   },
   {
     pageName: "教科書検索",
     path: "/search",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
+    icon: <Search />,
   },
   {
     pageName: "教科書登録",
     path: "/register-textbook",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
+    icon: <Upload />,
   },
   {
     pageName: "欲しい教科書",
     path: "/wish-list",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
+    icon: <Bookmark />,
   },
   {
     pageName: "チャット",
     path: "/chats",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
+    icon: <MessageSquare />,
   },
   {
     pageName: "設定",
     path: "/setting",
-    icon: <UploadedImage className={styles.icon} altText="Uploaded Image" />,
+    icon: <Settings />,
   },
 ];
 
@@ -100,6 +101,7 @@ const Layout: FC<Props> = ({ children }) => {
                 background: isPageActive(navigation.path) ? "#1B555A" : "none",
               }}
             >
+              {navigation.icon}
               {menuOpen && (
                 <p className={styles.pageName}>{navigation.pageName}</p>
               )}
