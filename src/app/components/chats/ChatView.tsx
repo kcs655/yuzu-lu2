@@ -10,6 +10,9 @@ export default function ChatView() {
   const [requests, setRequests] = useState<any[]>([]);
   const [currentRequestID, setCurrentRequestID] = useState<string | null>(null);
 
+  // サイドバーの開閉状態
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   useEffect(() => {
     getRequests();
   }, []);
@@ -23,7 +26,7 @@ export default function ChatView() {
       // 現在ログインしているユーザーが登録した本のIDを取得
       const { data: textbooks, error: textbookError } = await supabase
         .from("textbook")
-        .select("id, title") // 教科書のタイトルも取得
+        .select("id, title")
         .eq("user_id", user.id);
       if (textbookError || !textbooks) {
         console.error("Error fetching textbooks:", textbookError?.message);
@@ -73,54 +76,48 @@ export default function ChatView() {
         allRequests.map(async (request: any) => {
           // `requester_id` が現在のユーザーと一致する場合
           if (request.requester_id === user.id) {
-            // `textbook_id` の外部キーである `textbook` テーブルの `user_id` を取得
-            const { data: textbookData, error: textbookError } = await supabase
+            const { data: textbookData, error: textbookErr } = await supabase
               .from("textbook")
-              .select("user_id, title") // 教科書のタイトルも取得
+              .select("user_id, title")
               .eq("id", request.textbook_id)
               .single();
-            if (textbookError) {
-              console.error(
-                "Error fetching textbook data:",
-                textbookError.message
-              );
+            if (textbookErr) {
+              console.error("Error fetching textbook data:", textbookErr.message);
               return null;
             }
 
-            // `user_id` の外部キーである `profiles` の `email` を取得
-            const { data: profileData, error: profileError } = await supabase
+            // `user_id` の外部キーである `profiles` テーブルの `email` を取得
+            const { data: profileData, error: profileErr } = await supabase
               .from("profiles")
               .select("email")
               .eq("id", textbookData.user_id);
 
-            if (profileError || profileData.length === 0) {
-              console.error("Error fetching profile data:", profileError ? profileError.message : "No profile found");
+            if (profileErr || profileData.length === 0) {
+              console.error(
+                "Error fetching profile data:",
+                profileErr ? profileErr.message : "No profile found"
+              );
               return null;
             }
 
-            if (profileData.length > 1) {
-              console.error("Error: Multiple profiles found for the same ID");
-              return null;
-            }
-
-            const profile = profileData[0]; // 期待通りに単一のプロファイルを取得
+            const profile = profileData[0];
 
             return {
               id: request.id,
               requester: profile.email,
-              textbookName: textbookData.title // 教科書のタイトルを追加
+              textbookName: textbookData.title,
             };
           } else {
             // `textbook_id` に基づいて教科書のタイトルを取得
-            const { data: textbookData, error: textbookError } = await supabase
+            const { data: textbookData, error: textbookErr } = await supabase
               .from("textbook")
-              .select("title") // 教科書のタイトルを取得
+              .select("title")
               .eq("id", request.textbook_id)
               .single();
-            if (textbookError || !textbookData) {
+            if (textbookErr || !textbookData) {
               console.error(
                 "Error fetching textbook data:",
-                textbookError ? textbookError.message : "No textbook found"
+                textbookErr ? textbookErr.message : "No textbook found"
               );
               return null;
             }
@@ -131,7 +128,7 @@ export default function ChatView() {
             return {
               id: request.id,
               requester: requesterData[0].email,
-              textbookName: textbookData.title // 教科書の名前を追加
+              textbookName: textbookData.title,
             };
           }
         })
@@ -166,38 +163,78 @@ export default function ChatView() {
     setCurrentRequestID(id);
   };
 
-  return ( 
-    <div className="relative flex w-full max-w-4xl h-max min-h-screen pb-16">
-      <ul className="w-64 max-w-64 bg-white">
-        {requests.map((item) => (
-          <li
-            key={item.id}
-            className={`border-b border-b-gray-200 ${
-              currentRequestID === item.id ? "bg-gray-200 font-bold" : "bg-white"
-            } transition-all duration-200`}
-          >
-            <button
-              onClick={() => handleRequestClick(item.id)}
-              className="text-left p-4 w-full hover:bg-gray-200"
-            >
-              {item.requester} - {item.textbookName}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="w-full bg-gray-200 border-l p-4">
-        {currentRequestID ? (
-          <>
-            <h2 className="text-xl font-bold mb-4">
-              {requests.find((req) => req.id === currentRequestID)?.textbookName}
-            </h2>
-            <ChatList request_id={currentRequestID} />
-          </>
-        ) : (
-          <p className="text-gray-500">チャットを選択してください</p>
+  // 選択中のチャット情報を取得
+  const currentRequest = requests.find((req) => req.id === currentRequestID);
+
+  return (
+    // 高さを画面全体にし、縦にヘッダーとメインを並べる
+    <div className="w-full max-w-4xl mx-auto h-screen flex flex-col">
+      {/* 
+        stickyヘッダー部分: 
+          - 画面最上部に固定 (sticky top-0)
+          - スクロールしても残る
+      */}
+      <header className="sticky top-0 z-10 bg-white shadow flex items-center px-4 py-2">
+        {/* 左側: チャット一覧の開閉ボタン */}
+        <button
+          onClick={() => setIsSidebarOpen((prev) => !prev)}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          {isSidebarOpen ? "＜" : "＞"}
+        </button>
+
+        {/* 中央: 選択中のチャットの「メールアドレス - 教科書名」を表示 */}
+        <div className="flex-1 text-center font-bold">
+          {currentRequestID
+            ? `${currentRequest?.requester} - ${currentRequest?.textbookName}`
+            : "メールアドレスと教科書名"}
+        </div>
+      </header>
+
+      {/* 
+        メイン部分:
+          - flex: 横方向にサイドバーとチャット内容を並べる
+          - flex-1: 画面下まで高さを埋める
+          - overflow-hidden: 内部のスクロールを制御する
+      */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* サイドバー部分 */}
+        {isSidebarOpen && (
+          <ul className="w-64 bg-white border-r border-gray-300 overflow-y-auto">
+            {requests.map((item) => (
+              <li
+                key={item.id}
+                className={`border-b border-b-gray-200 ${
+                  currentRequestID === item.id
+                    ? "bg-gray-200 font-bold"
+                    : "bg-white"
+                } transition-all duration-200`}
+              >
+                <button
+                  onClick={() => handleRequestClick(item.id)}
+                  className="text-left p-4 w-full hover:bg-gray-200"
+                >
+                  {item.requester} - {item.textbookName}
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
+
+        {/* チャット表示部分 */}
+        <div className="flex-1 bg-gray-200 p-4 overflow-y-auto">
+          {currentRequestID ? (
+            <>
+              <h2 className="text-xl font-bold mb-4">
+                {currentRequest?.textbookName}
+              </h2>
+              <ChatList request_id={currentRequestID} />
+            </>
+          ) : (
+            <p className="text-gray-500">チャットを選択してください</p>
+          )}
+        </div>
       </div>
     </div>
   );
-  
 }
