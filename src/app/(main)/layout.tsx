@@ -11,6 +11,7 @@ import {
   Upload,
   MessageSquare,
   Bookmark,
+  LogOut,
 } from "lucide-react";
 
 type Props = {
@@ -121,15 +122,7 @@ const Layout: FC<Props> = ({ children }) => {
           onClick={() => setShowLogoutConfirm(true)}
         >
           {/* 画像アイコンを常に表示 */}
-          <img
-            src="/images/exit.png"
-            alt="Exit Icon"
-            style={{
-              width: "24px",
-              height: "24px",
-              marginRight: menuOpen ? "8px" : "0",
-            }}
-          />
+          <LogOut color="white" />
           {menuOpen && (
             <p
               className={styles.pageName}
