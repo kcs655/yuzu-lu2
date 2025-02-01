@@ -13,6 +13,7 @@ import {
   Bookmark,
   LogOut,
 } from "lucide-react";
+import Image from "next/image";
 
 type Props = {
   children: ReactNode;
@@ -86,19 +87,32 @@ const Layout: FC<Props> = ({ children }) => {
         className={styles.sidebar}
         style={{ width: menuOpen ? "300px" : "60px" }}
       >
-        <div
-          className={styles.hamburger}
-          role="button"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {[...Array(3)].map((_, index: number) => (
-            <span
-              className={
-                menuOpen ? styles.menuCloseArrow : styles.menuOpenArrow
-              }
-              key={index}
-            ></span>
-          ))}
+        <div className={styles.header}>
+          <div
+            className={styles.hamburger}
+            role="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {[...Array(3)].map((_, index: number) => (
+              <span
+                className={
+                  menuOpen ? styles.menuCloseArrow : styles.menuOpenArrow
+                }
+                key={index}
+              ></span>
+            ))}
+          </div>
+          {/* 画像表示部分 */}
+          {menuOpen && (
+            <Image
+              src="/images/logo01.png" // 画像のパス
+              alt="Logo"
+              width={0}
+              height={0}
+              sizes="100vw"
+              className={styles.logo}
+            />
+          )}
         </div>
         {navigations.map((navigation) => (
           <Link href={navigation.path} key={navigation.pageName} legacyBehavior>
