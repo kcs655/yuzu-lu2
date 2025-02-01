@@ -29,5 +29,12 @@ export interface RequestType {
   status: string; // ここに status を追加
   profiles: {
     email: string;
-  }
+  };
 }
+export type ChatMessage = {
+  id: string;
+  sender_id: string;
+  message: string;
+  created_at: string;
+  is_read: boolean;
+};

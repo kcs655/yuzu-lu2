@@ -82,7 +82,10 @@ export default function ChatView() {
               .eq("id", request.textbook_id)
               .single();
             if (textbookErr) {
-              console.error("Error fetching textbook data:", textbookErr.message);
+              console.error(
+                "Error fetching textbook data:",
+                textbookErr.message
+              );
               return null;
             }
 
@@ -225,9 +228,6 @@ export default function ChatView() {
         <div className="flex-1 bg-gray-200 p-4 overflow-y-auto">
           {currentRequestID ? (
             <>
-              <h2 className="text-xl font-bold mb-4">
-                {currentRequest?.textbookName}
-              </h2>
               <ChatList request_id={currentRequestID} />
             </>
           ) : (
