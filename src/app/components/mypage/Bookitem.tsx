@@ -58,21 +58,21 @@ const MainPage = () => {
   }, [user?.id]);
 
   if (loadingUser) {
-    return <div className="text-center">ユーザー情報を取得中...</div>; // WishListと文言を合わせる(スタイルは元々同じ)
+    return <div className="text-center">ユーザー情報を取得中...</div>; 
   }
 
   if (loadingBooks) {
-    return <div className="text-center">教科書を取得中...</div>; // WishListと文言を合わせる(スタイルは元々同じ)
+    return <div className="text-center">教科書を取得中...</div>; 
   }
 
   if (books.length === 0) {
-    return <div className="text-center">教科書が投稿されていません</div>; // WishListと文言を合わせる(スタイルは元々同じ)
+    return <div className="text-center">教科書が投稿されていません</div>; 
   }
 
   return (
     <div className="grid grid-cols-3 gap-5">
       {books.map((book) => (
-        <BookItem key={book.id} book={book} /> // BookItemからWishItemに変更(見た目が同じならBookItemでもOK)
+        <BookItem key={book.id} book={book} /> 
       ))}
     </div>
   );

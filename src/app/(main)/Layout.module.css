@@ -121,6 +121,6 @@
 
 .logo {
   margin-left: 15px;
-  height: 40px; /* ハンバーガーメニューの高さに合わせる */
-  width: auto; /* アスペクト比を維持 */
+  height: 40px; 
+  width: auto; 
 }

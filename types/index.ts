@@ -26,7 +26,7 @@ export interface RequestType {
   textbook_id: string;
   updated_at: string;
   created_at: string;
-  status: string; // ここに status を追加
+  status: string; 
   profiles: {
     email: string;
   };

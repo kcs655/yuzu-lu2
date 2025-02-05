@@ -2,8 +2,8 @@
 
 import { useState, Dispatch, SetStateAction, KeyboardEvent } from "react";
 import { supabase } from "../../../../lib/supabase";
-import useStore from "../../../../store"; // Zustandのストアをインポート
-import { ChatMessage } from "./ChatList"; // ChatMessage をインポート
+import useStore from "../../../../store"; 
+import { ChatMessage } from "./ChatList"; 
 import { Loader2, Send } from "lucide-react";
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 };
 
 export default function SendButton({ request_id, setChatData }: Props) {
-  const { user } = useStore(); // Zustandのストアからユーザー情報を取得
+  const { user } = useStore(); 
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 

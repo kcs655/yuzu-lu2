@@ -9,8 +9,8 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState(""); // エラーメッセージの状態
-
+  const [errorMessage, setErrorMessage] = useState(""); 
+  
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage(""); // ログイン試行時にエラーメッセージをリセット
@@ -21,7 +21,6 @@ const Login = () => {
       });
       if (error) {
         console.error(error.message);
-        // Supabaseのエラーメッセージをユーザーにわかりやすいメッセージに変換
         switch (error.message) {
           case "Invalid login credentials":
             setErrorMessage("メールアドレスまたはパスワードが間違っています。");

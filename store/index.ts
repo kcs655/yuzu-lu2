@@ -1,5 +1,3 @@
-// Zustand Reactの状態管理ライブラリ
-// https://github.com/pmndrs/zustand
 import { create } from 'zustand'
 
 type User = {

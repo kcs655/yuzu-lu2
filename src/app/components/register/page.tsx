@@ -17,7 +17,7 @@ const TextbookNew = () => {
   const isbnRef = useRef<HTMLInputElement>(null!);
   const detailsRef = useRef<HTMLTextAreaElement>(null!);
   const [image, setImage] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null); // 画像URLの状態を追加
+  const [imageUrl, setImageUrl] = useState<string | null>(null); 
 
   useEffect(() => {
     const fetchUser = async () => {

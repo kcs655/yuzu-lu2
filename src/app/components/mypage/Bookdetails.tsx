@@ -200,7 +200,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
       {/* メインコンテンツエリア */}
       <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
         <div className="grid md:grid-cols-2 gap-8">
-          {/* 左カラム: 画像 */}
+          {/*  画像 */}
           <div className="space-y-4">
             <div className="aspect-w-3 aspect-h-4 bg-gray-100 rounded-lg overflow-hidden">
               <img
@@ -211,7 +211,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
             </div>
           </div>
 
-          {/* 右カラム: 基本情報 */}
+          {/*基本情報 */}
           <div className="space-y-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -225,7 +225,7 @@ const BookDetail: React.FC<BookDetailProps> = ({ book, isMyBook }) => {
               )}
             </div>
 
-            {/* 基本情報カード */}
+            {/* 基本情報*/}
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <div className="grid grid-cols-2 gap-4">
                 <div>

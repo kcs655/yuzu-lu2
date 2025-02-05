@@ -195,7 +195,6 @@ export default function ChatList({ request_id }: Props) {
                               : "text-gray-500"
                           }
                         >
-                          {/* 変更: formatTime 関数を使用 */}
                           {formatTime(item.created_at)}
                         </span>
                         {user?.id === item.sender_id && (

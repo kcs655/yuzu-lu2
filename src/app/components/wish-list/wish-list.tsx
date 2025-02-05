@@ -16,7 +16,7 @@ const WishList = () => {
       if (user?.id) {
         const { data: wishlistData, error } = await supabase
           .from("wantbook")
-          .select("textbook(*)") // textbookテーブルのデータも一緒に取得
+          .select("textbook(*)") 
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
 
@@ -26,7 +26,6 @@ const WishList = () => {
         }
 
         if (wishlistData) {
-          // `any[][]` から `BookType[]` への変換を明示的に行う
           const books = wishlistData.map(
             (item: any) => item.textbook
           ) as BookType[];

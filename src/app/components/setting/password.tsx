@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
 
-// メールアドレス表示コンポーネント
+// メールアドレス表示
 export const ShowEmail = () => {
   const [email, setEmail] = useState("");
 
@@ -33,7 +33,7 @@ export const ShowEmail = () => {
   );
 };
 
-// パスワード変更コンポーネント
+// パスワード変更
 export const ChangePassword = () => {
   const router = useRouter();
   const [oldPassword, setOldPassword] = useState("");
@@ -61,7 +61,7 @@ export const ChangePassword = () => {
       } else {
         setMessage("パスワードを変更しました。");
         setIsSuccess(true);
-        setOldPassword(""); // 成功したら入力欄をクリア
+        setOldPassword(""); 
         setNewPassword("");
         setConfirmPassword("");
         setTimeout(() => {

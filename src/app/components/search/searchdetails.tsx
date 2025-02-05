@@ -99,7 +99,6 @@ const SearchDetail = ({ book }: BookDetailProps) => {
     return sanitizedDescription;
   };
 
-  // OGP用の画像
   const ogImage = useMemo(() => {
     return book.image_url || "/images/noimage.png";
   }, [book.image_url]);
@@ -120,18 +119,18 @@ const SearchDetail = ({ book }: BookDetailProps) => {
       />
       <ArticleJsonLd
         type="BlogPosting"
-        url={`https://www.example.com/textbook/${book.id}`} // 実際のドメインに修正
+        url={`https://www.example.com/textbook/${book.id}`} 
         title={book.title}
         images={ogImage ? [ogImage] : []}
         datePublished={book.created_at}
-        authorName="Author Name" // 実際の著者名に修正
+        authorName="Author Name" 
         description={book.details}
       />
 
       {/* メインコンテンツエリア */}
       <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
         <div className="grid md:grid-cols-2 gap-8">
-          {/* 左カラム: 画像 */}
+          {/*  画像 */}
           <div className="space-y-4">
             <div className="aspect-w-3 aspect-h-4 bg-gray-100 rounded-lg overflow-hidden">
               <img
@@ -142,7 +141,7 @@ const SearchDetail = ({ book }: BookDetailProps) => {
             </div>
           </div>
 
-          {/* 右カラム: 基本情報 */}
+          {/* 基本情報 */}
           <div className="space-y-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
@@ -156,7 +155,7 @@ const SearchDetail = ({ book }: BookDetailProps) => {
               )}
             </div>
 
-            {/* 基本情報カード */}
+            {/* 基本情報 */}
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <div className="grid grid-cols-2 gap-4">
                 <div>

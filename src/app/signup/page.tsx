@@ -39,19 +39,19 @@ const SignUp = () => {
         <div style={{ position: 'absolute', left: '1rem' }}>
       <Link href="/" style={{ cursor: 'pointer' }}>
         <Image
-          src="/modoru.png"  //modoru.png を参照
+          src="/modoru.png"  
           alt="戻る"
-          width={40}             // お好みでサイズ調整してください
+          width={40}             
           height={40}
         />
       </Link>
     </div>
         <h1 style={{ margin: 0 }}>
                 <Image
-                  src="/images/logo.png"  // ここは実際の画像パスに変えてください
+                  src="/images/logo.png"  
                   alt="Yuzu➡Lu"
-                  width={200}                  // 画像サイズに合わせて変更
-                  height={200}                 // 画像サイズに合わせて変更
+                  width={200}                  
+                  height={200}                 
                 />
               </h1>
       </header>
@@ -109,9 +109,6 @@ const SignUp = () => {
               textDecoration: "underline",
               cursor: "pointer",
             }}
-            // 新しいタブで開きたい場合は下記のような設定も可能
-            // target="_blank"
-            // rel="noopener noreferrer"
           >
             利用規約
           </Link>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
 import ChatList from "./ChatList";
-import useStore from "../../../../store"; // Zustandのストアをインポート
+import useStore from "../../../../store"; 
 
 export default function ChatView() {
   const { setUser } = useStore(); // Zustandのストアからユーザー情報を取得
@@ -170,15 +170,9 @@ export default function ChatView() {
   const currentRequest = requests.find((req) => req.id === currentRequestID);
 
   return (
-    // 高さを画面全体にし、縦にヘッダーとメインを並べる
     <div className="w-full max-w-4xl mx-auto h-screen flex flex-col">
-      {/* 
-        stickyヘッダー部分: 
-          - 画面最上部に固定 (sticky top-0)
-          - スクロールしても残る
-      */}
       <header className="sticky top-0 z-10 bg-white shadow flex items-center px-4 py-2">
-        {/* 左側: チャット一覧の開閉ボタン */}
+        {/* チャット一覧の開閉ボタン */}
         <button
           onClick={() => setIsSidebarOpen((prev) => !prev)}
           className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -186,7 +180,7 @@ export default function ChatView() {
           {isSidebarOpen ? "＜" : "＞"}
         </button>
 
-        {/* 中央: 選択中のチャットの「メールアドレス - 教科書名」を表示 */}
+        {/* 選択中のチャットの「メールアドレス - 教科書名」を表示 */}
         <div className="flex-1 text-center font-bold">
           {currentRequestID
             ? `${currentRequest?.requester} - ${currentRequest?.textbookName}`
@@ -194,12 +188,6 @@ export default function ChatView() {
         </div>
       </header>
 
-      {/* 
-        メイン部分:
-          - flex: 横方向にサイドバーとチャット内容を並べる
-          - flex-1: 画面下まで高さを埋める
-          - overflow-hidden: 内部のスクロールを制御する
-      */}
       <div className="flex flex-1 overflow-hidden">
         {/* サイドバー部分 */}
         {isSidebarOpen && (

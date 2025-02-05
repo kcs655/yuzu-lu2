@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/compat/router"; // `next/compat/router` を使用
+import { useRouter } from "next/compat/router"; 
 import { supabase } from "../../../../lib/supabase";
 import ChatView from "@/app/components/chats/ChatView";
-import useStore from "../../../../store"; // Zustandのストアをインポート
+import useStore from "../../../../store"; 
 
 export default function ChatsPage({
 }: {
   searchParams: Promise<{ companyid: string }>;
 }) {
-  const { setUser } = useStore(); // Zustandのストアからユーザー設定関数を取得
+  const { setUser } = useStore(); 
   const router = useRouter();
 
   useEffect(() => {

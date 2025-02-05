@@ -14,7 +14,6 @@ const BookItem = ({ book }: BookItemProps) => {
     <div className="break-words border rounded">
       <Link href={`mypage/${book.id}`}>
         {" "}
-        {/* 変更: hrefをwish-list/${book.id}からmypage/${book.id}に変更 */}
         <div className="aspect-video relative overflow-hidden">
           <Image
             src={book.image_url || "/images/noimage.png"}
